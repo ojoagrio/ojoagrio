@@ -1,0 +1,67 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SocialButton from '../components/SocialButton.astro';
+
+const SPOTIFY_ARTIST_ID = '5Max3Ac0SJrL1koxqzOHVy';
+---
+
+<Layout title="OjoAgrio — Rap mexicano con sabor a verano">
+  <main class="wrap">
+    <div class="avatar">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" fill="#FFB347" stroke="#241A2E" stroke-width="5" />
+        <ellipse cx="50" cy="52" rx="30" ry="20" fill="#fff" stroke="#241A2E" stroke-width="4" />
+        <circle cx="50" cy="52" r="12" fill="#2EC4B6" stroke="#241A2E" stroke-width="4" />
+        <circle cx="50" cy="52" r="5" fill="#241A2E" />
+        <path d="M20 52c6-14 20-22 30-22s24 8 30 22" stroke="#241A2E" stroke-width="4" fill="none" stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <h1 class="title display">OJOAGRIO</h1>
+    <span class="subtitle">🇲🇽 Rap &amp; vibras chill</span>
+
+    <p class="bio">
+      Rimas con sabor a verano, corridos con onda y nostalgia de caricatura de sábado. Escuchá lo nuevo y seguime en todos lados 👇
+    </p>
+
+    <div class="links">
+      <SocialButton
+        type="instagram"
+        href="https://www.instagram.com/ojoagrio/"
+        label="Instagram"
+        sub="Fotos, historias y detrás de cámaras"
+      />
+      <SocialButton
+        type="tiktok"
+        href="https://www.tiktok.com/@ojoagrio"
+        label="TikTok"
+        sub="Los videos más chidos"
+      />
+      <SocialButton
+        type="spotify"
+        href={`https://open.spotify.com/artist/${SPOTIFY_ARTIST_ID}`}
+        label="Spotify"
+        sub="Escuchá toda la música"
+      />
+      <SocialButton
+        type="youtube"
+        href="https://www.youtube.com/channel/UCDsqWZ2crSSNwv-JMaOuoEA"
+        label="YouTube"
+        sub="Videos y visualizers"
+      />
+    </div>
+
+    <span class="section-label display">🔥 ÚLTIMO LANZAMIENTO</span>
+    <div class="embed-card">
+      <iframe
+        src={`https://open.spotify.com/embed/artist/${SPOTIFY_ARTIST_ID}?utm_source=generator&theme=0`}
+        height="352"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        title="OjoAgrio en Spotify"
+      ></iframe>
+    </div>
+
+    <footer>© {new Date().getFullYear()} OjoAgrio</footer>
+  </main>
+</Layout>
