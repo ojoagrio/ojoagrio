@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { SocialButton } from '@ojoagrio/ui';
-import { getMockArtistBySlug } from '@/lib/mock-artists';
+import { getArtistBySlug } from '@/lib/artists';
 import { RevealOnMount } from '@/components/RevealOnMount';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 export default async function ArtistPage({ params }: Props) {
   const { usuario } = await params;
-  const artist = getMockArtistBySlug(usuario);
+  const artist = await getArtistBySlug(usuario);
 
   if (!artist) notFound();
 
