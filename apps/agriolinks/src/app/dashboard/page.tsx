@@ -10,11 +10,5 @@ export default async function DashboardPage() {
   const artist = await getArtistByUserId(session.user.id);
   if (!artist) redirect('/agriolinks/login');
 
-  return (
-    <main className="wrap">
-      <h1 className="title display">Tu página</h1>
-      <p className="bio">Editá tu bio, tus links y tu fondo animado. Los cambios se ven al toque en tu página pública.</p>
-      <ProfileForm artist={artist} />
-    </main>
-  );
+  return <ProfileForm artist={artist} />;
 }

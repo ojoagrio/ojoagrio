@@ -40,6 +40,11 @@ const icons: Record<SocialType, ReactNode> = {
   ),
 };
 
+/** Just the platform glyph, for contexts that build their own layout around it (e.g. a dashboard form). */
+export function SocialIcon({ type }: { type: SocialType }) {
+  return <>{icons[type]}</>;
+}
+
 /** React port of SocialButton.astro — same classes, same markup shape. */
 export function SocialButton({ href, label, sub, type, reveal = true }: Props) {
   return (
