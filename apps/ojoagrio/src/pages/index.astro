@@ -7,7 +7,7 @@ const SPOTIFY_ARTIST_ID = '5Max3Ac0SJrL1koxqzOHVy';
 
 <Layout title="OjoAgrio — Rap mexicano con sabor a verano">
   <main class="wrap">
-    <div class="avatar">
+    <div class="avatar reveal">
       <svg viewBox="0 0 100 100" fill="none">
         <circle cx="50" cy="50" r="46" fill="#FFB347" stroke="#241A2E" stroke-width="5" />
         <ellipse cx="50" cy="52" rx="30" ry="20" fill="#fff" stroke="#241A2E" stroke-width="4" />
@@ -17,11 +17,11 @@ const SPOTIFY_ARTIST_ID = '5Max3Ac0SJrL1koxqzOHVy';
       </svg>
     </div>
 
-    <h1 class="title display">OJOAGRIO</h1>
-    <span class="subtitle">🇲🇽 Rap &amp; vibras chill</span>
+    <h1 class="title display reveal">OJOAGRIO</h1>
+    <span class="subtitle reveal">🇲🇽 Rap &amp; vibras chill</span>
 
-    <p class="bio">
-      Rimas con sabor a verano, corridos con onda y nostalgia de caricatura de sábado. Escuchá lo nuevo y seguime en todos lados 👇
+    <p class="bio reveal">
+      Rapero, productor y artista visual de CDMX. Mezclo lo que no debería mezclarse y dibujo lo que no debería existir — corridos con filo, nostalgia de caricatura prohibida y rimas que no piden permiso. La única forma de romper el sistema es formar parte del sistema 👽🔥
     </p>
 
     <div class="links">
@@ -51,8 +51,8 @@ const SPOTIFY_ARTIST_ID = '5Max3Ac0SJrL1koxqzOHVy';
       />
     </div>
 
-    <span class="section-label display">🔥 ÚLTIMO LANZAMIENTO</span>
-    <div class="embed-card">
+    <span class="section-label display reveal">🔥 ÚLTIMO LANZAMIENTO</span>
+    <div class="embed-card reveal">
       <iframe
         src={`https://open.spotify.com/embed/artist/${SPOTIFY_ARTIST_ID}?utm_source=generator&theme=0`}
         height="352"
@@ -62,6 +62,6 @@ const SPOTIFY_ARTIST_ID = '5Max3Ac0SJrL1koxqzOHVy';
       ></iframe>
     </div>
 
-    <footer>© {new Date().getFullYear()} OjoAgrio</footer>
+    <footer class="reveal">© {new Date().getFullYear()} OjoAgrio</footer>
   </main>
 </Layout>

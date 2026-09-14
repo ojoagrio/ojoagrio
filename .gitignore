@@ -1,4 +1,12 @@
 node_modules/
 dist/
 .astro/
-.env
+.vercel
+.env*
+
+# Next.js (apps/agriolinks)
+.next/
+next-env.d.ts
+
+# Turborepo
+.turbo/

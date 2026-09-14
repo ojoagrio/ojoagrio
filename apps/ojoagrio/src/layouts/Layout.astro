@@ -1,0 +1,280 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'OjoAgrio — rap mexicano con sabor a verano. Escuchá, mirá y seguí todo acá.',
+} = Astro.props;
+
+const ogImage = new URL('/og-image.png', Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+  <body>
+    <div id="vanta-bg" class="bg-layer"></div>
+
+    <div class="bg-switcher">
+      <div class="bg-switcher-pill">
+        <span class="mini-brand">👁️ OJOAGRIO</span>
+        <span class="pill-divider"></span>
+        <label for="bg-select" class="bg-select-label">🎨</label>
+        <select id="bg-select" class="bg-select" aria-label="Elegir fondo animado">
+          <option value="liquid">💧 Líquido</option>
+          <option value="fog">🌫️ Bruma</option>
+          <option value="cells">🫧 Células</option>
+          <option value="net">🕸️ Red</option>
+          <option value="halo">🌀 Halo</option>
+          <option value="globe">🌐 Globo</option>
+        </select>
+      </div>
+    </div>
+
+    <slot />
+
+    <script is:inline>
+      (function () {
+        var THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+        var VANTA_BASE = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/';
+        var STORAGE_KEY = 'ojoagrio-bg-fx';
+        var MODES = ['liquid', 'fog', 'cells', 'net', 'halo', 'globe'];
+        var AUTO_MS = 5000;
+
+        var vantaEl = document.getElementById('vanta-bg');
+        var select = document.getElementById('bg-select');
+
+        var vantaEffect = null;
+        var autoTimer = null;
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            if (document.querySelector('script[src="' + src + '"]')) return resolve();
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = function () { resolve(); };
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        function stopAll() {
+          if (vantaEffect) {
+            try { vantaEffect.destroy(); } catch (e) {}
+            vantaEffect = null;
+          }
+          vantaEl.style.display = 'none';
+        }
+
+        function ensureThree() {
+          if (window.THREE) return Promise.resolve();
+          return loadScript(THREE_SRC);
+        }
+
+        function startLiquid() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.WAVES) return;
+              return loadScript(VANTA_BASE + 'vanta.waves.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.WAVES({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                color: 0xe4007c,
+                shininess: 60,
+                waveHeight: 22,
+                waveSpeed: 1.15,
+                zoom: 0.85,
+              });
+            });
+        }
+
+        function startFog() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.FOG) return;
+              return loadScript(VANTA_BASE + 'vanta.fog.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.FOG({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                highlightColor: 0xffb347,
+                midtoneColor: 0xff6b4a,
+                lowlightColor: 0xe4007c,
+                baseColor: 0x241a2e,
+                blurFactor: 0.6,
+                speed: 1.6,
+                zoom: 1,
+              });
+            });
+        }
+
+        function startCells() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.CELLS) return;
+              return loadScript(VANTA_BASE + 'vanta.cells.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.CELLS({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                color1: 0xff6b4a,
+                color2: 0x2ec4b6,
+                size: 1.6,
+                speed: 1.1,
+              });
+            });
+        }
+
+        function startNet() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.NET) return;
+              return loadScript(VANTA_BASE + 'vanta.net.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.NET({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                color: 0x2ec4b6,
+                backgroundColor: 0x241a2e,
+                points: 10,
+                maxDistance: 22,
+                spacing: 16,
+              });
+            });
+        }
+
+        function startHalo() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.HALO) return;
+              return loadScript(VANTA_BASE + 'vanta.halo.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.HALO({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                baseColor: 0xe4007c,
+                backgroundColor: 0x241a2e,
+                amplitudeFactor: 2,
+                size: 1.4,
+              });
+            });
+        }
+
+        function startGlobe() {
+          vantaEl.style.display = 'block';
+          ensureThree()
+            .then(function () {
+              if (window.VANTA && window.VANTA.GLOBE) return;
+              return loadScript(VANTA_BASE + 'vanta.globe.min.js');
+            })
+            .then(function () {
+              vantaEffect = window.VANTA.GLOBE({
+                el: vantaEl,
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                color: 0xffb347,
+                color2: 0xe4007c,
+                size: 1.2,
+                backgroundColor: 0x241a2e,
+              });
+            });
+        }
+
+        function activate(mode) {
+          stopAll();
+          if (mode === 'fog') startFog();
+          else if (mode === 'cells') startCells();
+          else if (mode === 'net') startNet();
+          else if (mode === 'halo') startHalo();
+          else if (mode === 'globe') startGlobe();
+          else startLiquid();
+          select.value = mode;
+          try { localStorage.setItem(STORAGE_KEY, mode); } catch (e) {}
+        }
+
+        function restartAutoCycle() {
+          if (autoTimer) clearInterval(autoTimer);
+          autoTimer = setInterval(function () {
+            var idx = MODES.indexOf(select.value);
+            var next = MODES[(idx + 1) % MODES.length];
+            activate(next);
+          }, AUTO_MS);
+        }
+
+        select.addEventListener('change', function () {
+          activate(select.value);
+          restartAutoCycle();
+        });
+
+        var saved = 'liquid';
+        try { saved = localStorage.getItem(STORAGE_KEY) || 'liquid'; } catch (e) {}
+        activate(saved);
+        restartAutoCycle();
+
+        var revealEls = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window && revealEls.length) {
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  var el = entry.target;
+                  el.classList.add('in-view');
+                  el.addEventListener('animationend', function () {
+                    el.classList.remove('reveal', 'in-view');
+                  }, { once: true });
+                  observer.unobserve(el);
+                }
+              });
+            },
+            { threshold: 0.15 }
+          );
+          revealEls.forEach(function (el) { observer.observe(el); });
+        } else {
+          revealEls.forEach(function (el) { el.classList.add('in-view'); });
+        }
+      })();
+    </script>
+  </body>
+</html>

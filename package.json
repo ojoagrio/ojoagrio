@@ -1,13 +1,17 @@
 {
-  "name": "ojoagrio-home",
+  "name": "ojoagrio-monorepo",
+  "private": true,
   "type": "module",
-  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "preview": "turbo run preview"
   },
-  "dependencies": {
-    "astro": "^4.16.0"
+  "devDependencies": {
+    "turbo": "^2.1.0"
   }
 }
