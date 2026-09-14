@@ -25,12 +25,16 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   const displayName = String(formData.get('displayName') ?? '').trim();
   const bio = String(formData.get('bio') ?? '').trim();
   const backgroundEffect = String(formData.get('backgroundEffect') ?? 'liquid');
+  const avatarUrl = String(formData.get('avatarUrl') ?? '').trim() || null;
 
   if (!displayName) {
     return { error: 'El nombre no puede estar vacío.' };
   }
   if (!BACKGROUND_EFFECTS.includes(backgroundEffect)) {
     return { error: 'Fondo inválido.' };
+  }
+  if (avatarUrl && !avatarUrl.includes('.blob.vercel-storage.com/')) {
+    return { error: 'Foto de perfil inválida.' };
   }
 
   const links: ArtistLink[] = [];
@@ -44,7 +48,7 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
 
   await getDb()
     .update(artists)
-    .set({ displayName, bio, backgroundEffect, links })
+    .set({ displayName, bio, backgroundEffect, avatarUrl, links })
     .where(eq(artists.userId, session.user.id));
 
   revalidatePath('/agriolinks/dashboard');

@@ -6,6 +6,7 @@ import { SocialIcon, type SocialType } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
 import { ShareButton } from './ShareButton';
+import { AvatarUpload } from './AvatarUpload';
 import './dashboard.css';
 
 const SOCIAL_TYPES: { type: SocialType; label: string }[] = [
@@ -26,9 +27,10 @@ const BACKGROUND_OPTIONS = [
 
 const initialState: SaveProfileState = {};
 
-export function ProfileForm({ artist }: { artist: OwnArtistProfile }) {
+export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; userId: string }) {
   const [state, formAction, pending] = useActionState(saveProfile, initialState);
   const [backgroundEffect, setBackgroundEffect] = useState(artist.backgroundEffect);
+  const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
 
   const linkByType = Object.fromEntries(artist.links.map((l) => [l.type, l]));
@@ -43,7 +45,7 @@ export function ProfileForm({ artist }: { artist: OwnArtistProfile }) {
           </button>
           <ShareButton path={publicPath} title={artist.displayName} />
         </div>
-        <ArtistPublicView artist={artist} reveal={false} />
+        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} />
       </div>
     );
   }
@@ -67,6 +69,11 @@ export function ProfileForm({ artist }: { artist: OwnArtistProfile }) {
         <form action={formAction}>
           <div className="dash-card">
             <h2 className="dash-section-title">Perfil</h2>
+            <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
+            <div className="dash-field">
+              <label className="dash-label">Foto de perfil</label>
+              <AvatarUpload userId={userId} initialUrl={artist.avatarUrl} onChange={setAvatarUrl} />
+            </div>
             <div className="dash-field">
               <label className="dash-label" htmlFor="displayName">
                 Nombre artístico

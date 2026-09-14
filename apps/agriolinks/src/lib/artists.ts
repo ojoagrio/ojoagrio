@@ -12,6 +12,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     slug: row.slug,
     displayName: row.displayName,
     bio: row.bio,
+    avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
   };
 }
@@ -29,6 +30,7 @@ export async function getArtistByUserId(userId: string): Promise<OwnArtistProfil
     slug: row.slug,
     displayName: row.displayName,
     bio: row.bio,
+    avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
     backgroundEffect: row.backgroundEffect,
   };

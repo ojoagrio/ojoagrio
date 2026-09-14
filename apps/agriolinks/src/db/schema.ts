@@ -26,6 +26,7 @@ export const artists = pgTable('artists', {
   slug: text('slug').notNull().unique(),
   displayName: text('display_name').notNull(),
   bio: text('bio').notNull().default(''),
+  avatarUrl: text('avatar_url'),
   // Array of { type: 'instagram' | 'tiktok' | 'spotify' | 'youtube', href, label, sub }
   links: jsonb('links').notNull().default([]),
   backgroundEffect: text('background_effect').notNull().default('liquid'),

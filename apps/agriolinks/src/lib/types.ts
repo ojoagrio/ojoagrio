@@ -11,5 +11,6 @@ export interface ArtistProfile {
   slug: string;
   displayName: string;
   bio: string;
+  avatarUrl: string | null;
   links: ArtistLink[];
 }

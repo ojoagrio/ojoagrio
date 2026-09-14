@@ -10,5 +10,5 @@ export default async function DashboardPage() {
   const artist = await getArtistByUserId(session.user.id);
   if (!artist) redirect('/agriolinks/login');
 
-  return <ProfileForm artist={artist} />;
+  return <ProfileForm artist={artist} userId={session.user.id} />;
 }
