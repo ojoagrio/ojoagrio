@@ -96,6 +96,9 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
     return { error: 'No pudimos crear tu perfil. Intentá de nuevo.' };
   }
 
-  await signIn('credentials', { email, password, redirectTo: '/dashboard' });
+  // Unlike redirect()/next/link, signIn()'s redirectTo is not basePath-aware —
+  // it needs the /agriolinks prefix written out, or it lands on ojoagrio.com
+  // (Astro site) with no matching route and 404s.
+  await signIn('credentials', { email, password, redirectTo: '/agriolinks/dashboard' });
   return {};
 }

@@ -87,5 +87,7 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
 }
 
 export async function logout() {
-  await signOut({ redirectTo: '/' });
+  // signOut()'s redirectTo is not basePath-aware — needs /agriolinks written
+  // out or it 404s on ojoagrio.com/ instead of landing on the AgrioLinks home.
+  await signOut({ redirectTo: '/agriolinks' });
 }

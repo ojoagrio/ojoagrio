@@ -16,7 +16,9 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
   }
 
   try {
-    await signIn('credentials', { email, password, redirectTo: '/dashboard' });
+    // signIn()'s redirectTo is not basePath-aware like redirect()/next/link —
+    // needs /agriolinks written out or it 404s on ojoagrio.com/dashboard.
+    await signIn('credentials', { email, password, redirectTo: '/agriolinks/dashboard' });
   } catch (err) {
     if (err instanceof AuthError) {
       return { error: 'Email o contraseña incorrectos.' };
