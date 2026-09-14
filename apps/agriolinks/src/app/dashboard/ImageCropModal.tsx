@@ -7,12 +7,17 @@ import { getCroppedImageBlob } from '@/lib/cropImage';
 
 interface Props {
   open: boolean;
-  userId: string;
+  title: string;
+  /** Vercel Blob pathname to upload the cropped image to, e.g. `avatars/${userId}-${Date.now()}.jpg`. */
+  uploadPath: string;
+  /** Token-generation endpoint for this upload, e.g. '/agriolinks/api/avatar/upload'. */
+  uploadUrl: string;
+  cropShape?: 'round' | 'rect';
   onClose: () => void;
   onUploaded: (url: string) => void;
 }
 
-export function AvatarCropModal({ open, userId, onClose, onUploaded }: Props) {
+export function ImageCropModal({ open, title, uploadPath, uploadUrl, cropShape = 'rect', onClose, onUploaded }: Props) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -59,9 +64,9 @@ export function AvatarCropModal({ open, userId, onClose, onUploaded }: Props) {
     setError(null);
     try {
       const blob = await getCroppedImageBlob(imageSrc, croppedArea);
-      const result = await upload(`avatars/${userId}-${Date.now()}.jpg`, blob, {
+      const result = await upload(uploadPath, blob, {
         access: 'public',
-        handleUploadUrl: '/agriolinks/api/avatar/upload',
+        handleUploadUrl: uploadUrl,
       });
       onUploaded(result.url);
       onClose();
@@ -78,16 +83,16 @@ export function AvatarCropModal({ open, userId, onClose, onUploaded }: Props) {
         className="dash-modal dash-crop-modal"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="avatar-crop-title"
+        aria-labelledby="image-crop-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="dash-section-title" id="avatar-crop-title">
-          Foto de perfil
+        <h2 className="dash-section-title" id="image-crop-title">
+          {title}
         </h2>
 
         {!imageSrc ? (
           <>
-            <p className="dash-modal-text">Elegí una imagen para tu foto de perfil.</p>
+            <p className="dash-modal-text">Elegí una imagen.</p>
             <div className="dash-actions">
               <button className="dash-btn-primary" type="button" onClick={() => fileInputRef.current?.click()}>
                 Elegir imagen
@@ -105,8 +110,8 @@ export function AvatarCropModal({ open, userId, onClose, onUploaded }: Props) {
                 crop={crop}
                 zoom={zoom}
                 aspect={1}
-                cropShape="round"
-                showGrid={false}
+                cropShape={cropShape}
+                showGrid={cropShape === 'rect'}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={(_, areaPixels) => setCroppedArea(areaPixels)}

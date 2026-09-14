@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AvatarCropModal } from './AvatarCropModal';
+import { ImageCropModal } from './ImageCropModal';
 
 interface Props {
   userId: string;
@@ -35,9 +35,12 @@ export function AvatarUpload({ userId, initialUrl, onChange }: Props) {
         </button>
       </div>
 
-      <AvatarCropModal
+      <ImageCropModal
         open={modalOpen}
-        userId={userId}
+        title="Foto de perfil"
+        uploadPath={`avatars/${userId}-${Date.now()}.jpg`}
+        uploadUrl="/agriolinks/api/avatar/upload"
+        cropShape="round"
         onClose={() => setModalOpen(false)}
         onUploaded={(newUrl) => {
           setUrl(newUrl);

@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { upload } from '@vercel/blob/client';
+import { useState } from 'react';
+import { ImageCropModal } from '../ImageCropModal';
 
 interface Props {
   userId: string;
@@ -14,30 +14,12 @@ interface Props {
 
 export function ProductPhotosUpload({ userId, productId, initialUrls, onChange, max = 3 }: Props) {
   const [urls, setUrls] = useState(initialUrls);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-
-    setError(null);
-    setUploading(true);
-    try {
-      const blob = await upload(`products/${userId}-${productId}-${Date.now()}-${file.name}`, file, {
-        access: 'public',
-        handleUploadUrl: '/agriolinks/api/products/upload',
-      });
-      const next = [...urls, blob.url];
-      setUrls(next);
-      onChange(next);
-    } catch {
-      setError('No se pudo subir la imagen. Probá con otra (JPG, PNG o WEBP, hasta 5MB).');
-    } finally {
-      setUploading(false);
-    }
+  function addPhoto(url: string) {
+    const next = [...urls, url];
+    setUrls(next);
+    onChange(next);
   }
 
   function removePhoto(url: string) {
@@ -58,23 +40,20 @@ export function ProductPhotosUpload({ userId, productId, initialUrls, onChange, 
         </div>
       ))}
       {urls.length < max && (
-        <button
-          type="button"
-          className="dash-photo-add"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading ? '…' : '+ Foto'}
+        <button type="button" className="dash-photo-add" onClick={() => setModalOpen(true)}>
+          + Foto
         </button>
       )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/webp,image/gif"
-        hidden
-        onChange={handleFileChange}
+
+      <ImageCropModal
+        open={modalOpen}
+        title="Foto del producto"
+        uploadPath={`products/${userId}-${productId}-${Date.now()}.jpg`}
+        uploadUrl="/agriolinks/api/products/upload"
+        cropShape="rect"
+        onClose={() => setModalOpen(false)}
+        onUploaded={addPhoto}
       />
-      {error && <p className="dash-message error">{error}</p>}
     </div>
   );
 }
