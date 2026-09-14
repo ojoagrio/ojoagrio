@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/agriolinks",
+      "destination": "https://agriolinks-ojoagrio.vercel.app/agriolinks"
+    },
+    {
+      "source": "/agriolinks/:path*",
+      "destination": "https://agriolinks-ojoagrio.vercel.app/agriolinks/:path*"
+    }
+  ]
+}
