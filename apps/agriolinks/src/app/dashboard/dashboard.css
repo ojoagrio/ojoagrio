@@ -174,26 +174,27 @@
 }
 
 .dash-bg-option {
-  border: 1.5px solid #e7ddd0;
+  border: none;
   border-radius: 14px;
   padding: 10px 6px;
-  background: #fdfbf8;
+  background: #ece1d1;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
   cursor: pointer;
   color: var(--ink-soft);
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dash-bg-option:hover {
-  border-color: #d8c9b4;
+  background: #e0d2ba;
+  transform: translateY(-1px);
 }
 
 .dash-bg-option[data-selected='true'] {
-  border-color: var(--rosa);
-  background: rgba(228, 0, 124, 0.08);
-  color: var(--rosa);
+  background: var(--rosa);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(228, 0, 124, 0.35);
 }
 
 /* Link cards: icon avatar + stacked fields, one per social platform */

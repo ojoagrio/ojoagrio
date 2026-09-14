@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
 const VANTA_BASE = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/';
 const STORAGE_KEY = 'ojoagrio-bg-fx';
 const MODES = ['liquid', 'fog', 'cells', 'net', 'halo', 'globe'] as const;
+// The landing page cycles through a fixed, curated subset with no picker —
+// the full 6-effect switcher belongs on the artist's own pages.
+const LANDING_MODES: readonly Mode[] = ['net', 'halo', 'fog'];
 const AUTO_MS = 5000;
 
 type Mode = (typeof MODES)[number];
@@ -24,11 +28,19 @@ interface Props {
 export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
   const vantaElRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
+  const currentModeRef = useRef<Mode>('liquid');
   // Small marketing previews embed a page in an <iframe> (e.g. the phone
   // mockup on the AgrioLinks landing page) just to show the layout — running
   // a second full Three.js/Vanta engine in there, plus the switcher control,
   // is wasted load and clutter. A flat gradient stands in instead.
   const [isEmbedded, setIsEmbedded] = useState(false);
+
+  // The landing page ("/") gets a fixed, curated background with no picker —
+  // everywhere else keeps the full switcher.
+  const pathname = usePathname();
+  const isLandingPage = pathname === '/';
+  const allowedModes = isLandingPage ? LANDING_MODES : MODES;
+  const showPicker = !isLandingPage;
 
   useEffect(() => {
     try {
@@ -40,8 +52,8 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
 
   useEffect(() => {
     const vantaEl = vantaElRef.current;
+    if (!vantaEl || isEmbedded) return;
     const select = selectRef.current;
-    if (!vantaEl || !select || isEmbedded) return;
 
     let vantaEffect: { destroy: () => void } | null = null;
     let autoTimer: ReturnType<typeof setInterval> | null = null;
@@ -169,6 +181,7 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
     function activate(mode: Mode) {
       stopAll();
       startEffect(mode);
+      currentModeRef.current = mode;
       if (select) select.value = mode;
       try {
         localStorage.setItem(STORAGE_KEY, mode);
@@ -180,36 +193,36 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
     function restartAutoCycle() {
       if (autoTimer) clearInterval(autoTimer);
       autoTimer = setInterval(() => {
-        const current = (select?.value as Mode) ?? 'liquid';
-        const idx = MODES.indexOf(current);
-        const next = MODES[(idx + 1) % MODES.length];
+        const idx = allowedModes.indexOf(currentModeRef.current);
+        const next = allowedModes[(idx + 1) % allowedModes.length];
         activate(next);
       }, AUTO_MS);
     }
 
     function onChange() {
-      activate((select?.value as Mode) ?? 'liquid');
+      activate((select?.value as Mode) ?? allowedModes[0]);
       restartAutoCycle();
     }
 
-    select.addEventListener('change', onChange);
+    select?.addEventListener('change', onChange);
 
-    let saved: Mode = 'liquid';
+    let saved: Mode = allowedModes[0];
     try {
-      saved = (localStorage.getItem(STORAGE_KEY) as Mode) || 'liquid';
+      const stored = localStorage.getItem(STORAGE_KEY) as Mode | null;
+      if (stored && (allowedModes as readonly string[]).includes(stored)) saved = stored;
     } catch {
-      // storage unavailable — default to 'liquid'
+      // storage unavailable — default to the first allowed mode
     }
     activate(saved);
     restartAutoCycle();
 
     return () => {
       cancelled = true;
-      select.removeEventListener('change', onChange);
+      select?.removeEventListener('change', onChange);
       if (autoTimer) clearInterval(autoTimer);
       stopAll();
     };
-  }, [isEmbedded]);
+  }, [isEmbedded, isLandingPage, allowedModes]);
 
   if (isEmbedded) {
     return (
@@ -223,23 +236,25 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
   return (
     <>
       <div ref={vantaElRef} id="vanta-bg" className="bg-layer" />
-      <div className="bg-switcher">
-        <div className="bg-switcher-pill">
-          <span className="mini-brand">{brandLabel}</span>
-          <span className="pill-divider" />
-          <label htmlFor="bg-select" className="bg-select-label">
-            🎨
-          </label>
-          <select ref={selectRef} id="bg-select" className="bg-select" aria-label="Elegir fondo animado" defaultValue="liquid">
-            <option value="liquid">💧 Líquido</option>
-            <option value="fog">🌫️ Bruma</option>
-            <option value="cells">🫧 Células</option>
-            <option value="net">🕸️ Red</option>
-            <option value="halo">🌀 Halo</option>
-            <option value="globe">🌐 Globo</option>
-          </select>
+      {showPicker && (
+        <div className="bg-switcher">
+          <div className="bg-switcher-pill">
+            <span className="mini-brand">{brandLabel}</span>
+            <span className="pill-divider" />
+            <label htmlFor="bg-select" className="bg-select-label">
+              🎨
+            </label>
+            <select ref={selectRef} id="bg-select" className="bg-select" aria-label="Elegir fondo animado" defaultValue="liquid">
+              <option value="liquid">💧 Líquido</option>
+              <option value="fog">🌫️ Bruma</option>
+              <option value="cells">🫧 Células</option>
+              <option value="net">🕸️ Red</option>
+              <option value="halo">🌀 Halo</option>
+              <option value="globe">🌐 Globo</option>
+            </select>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
