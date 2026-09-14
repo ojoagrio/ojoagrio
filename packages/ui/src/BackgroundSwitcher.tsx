@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
 const VANTA_BASE = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/';
@@ -24,11 +24,24 @@ interface Props {
 export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
   const vantaElRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLSelectElement>(null);
+  // Small marketing previews embed a page in an <iframe> (e.g. the phone
+  // mockup on the AgrioLinks landing page) just to show the layout — running
+  // a second full Three.js/Vanta engine in there, plus the switcher control,
+  // is wasted load and clutter. A flat gradient stands in instead.
+  const [isEmbedded, setIsEmbedded] = useState(false);
+
+  useEffect(() => {
+    try {
+      setIsEmbedded(window.self !== window.top);
+    } catch {
+      setIsEmbedded(true); // cross-origin access throws — that's an iframe too
+    }
+  }, []);
 
   useEffect(() => {
     const vantaEl = vantaElRef.current;
     const select = selectRef.current;
-    if (!vantaEl || !select) return;
+    if (!vantaEl || !select || isEmbedded) return;
 
     let vantaEffect: { destroy: () => void } | null = null;
     let autoTimer: ReturnType<typeof setInterval> | null = null;
@@ -196,7 +209,16 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
       if (autoTimer) clearInterval(autoTimer);
       stopAll();
     };
-  }, []);
+  }, [isEmbedded]);
+
+  if (isEmbedded) {
+    return (
+      <div
+        className="bg-layer"
+        style={{ background: 'linear-gradient(135deg, #241a2e 0%, #4a3b52 100%)' }}
+      />
+    );
+  }
 
   return (
     <>

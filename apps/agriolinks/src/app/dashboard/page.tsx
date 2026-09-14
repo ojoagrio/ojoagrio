@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getArtistByUserId } from '@/lib/artists';
+import { isAdminEmail } from '@/lib/admin';
 import { ProfileForm } from './ProfileForm';
 
 export default async function DashboardPage() {
@@ -10,5 +11,5 @@ export default async function DashboardPage() {
   const artist = await getArtistByUserId(session.user.id);
   if (!artist) redirect('/login');
 
-  return <ProfileForm artist={artist} userId={session.user.id} />;
+  return <ProfileForm artist={artist} userId={session.user.id} isAdmin={isAdminEmail(session.user.email)} />;
 }

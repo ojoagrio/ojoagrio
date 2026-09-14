@@ -1,4 +1,4 @@
-import { eq, and, isNull, or, lt, sql } from 'drizzle-orm';
+import { eq, and, isNull, or, lt, sql, gt } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { inviteCodes } from '@/db/schema';
 
@@ -23,4 +23,16 @@ export async function claimInviteCode(code: string): Promise<{ trialDays: number
     .returning({ trialDays: inviteCodes.trialDays });
 
   return result[0] ?? null;
+}
+
+/**
+ * Reverses a successful claimInviteCode when the signup that used it fails
+ * partway through (so the account never actually gets created), otherwise a
+ * single-use code would be burned for nothing.
+ */
+export async function releaseInviteCode(code: string): Promise<void> {
+  await getDb()
+    .update(inviteCodes)
+    .set({ usesCount: sql`${inviteCodes.usesCount} - 1` })
+    .where(and(eq(inviteCodes.code, code), gt(inviteCodes.usesCount, 0)));
 }

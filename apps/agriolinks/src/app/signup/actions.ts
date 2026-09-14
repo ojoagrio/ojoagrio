@@ -4,8 +4,13 @@ import { hash } from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { users, artists } from '@/db/schema';
-import { claimInviteCode } from '@/lib/invite-codes';
+import { claimInviteCode, releaseInviteCode } from '@/lib/invite-codes';
 import { signIn } from '@/auth';
+
+/** Postgres unique_violation — https://www.postgresql.org/docs/current/errcodes-appendix.html */
+function isUniqueViolation(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
+}
 
 export interface SignupState {
   error?: string;
@@ -62,17 +67,34 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
   const slug = await uniqueSlug(slugFromEmail(email));
   const trialEndsAt = new Date(Date.now() + claimed.trialDays * 24 * 60 * 60 * 1000);
 
-  await db.insert(users).values({ id: userId, email, passwordHash });
-  await db.insert(artists).values({
-    id: crypto.randomUUID(),
-    userId,
-    slug,
-    displayName: slugFromEmail(email),
-    bio: '',
-    links: [],
-    backgroundEffect: 'liquid',
-    trialEndsAt,
-  });
+  try {
+    await db.insert(users).values({ id: userId, email, passwordHash });
+  } catch (err) {
+    await releaseInviteCode(code);
+    if (isUniqueViolation(err)) {
+      return { error: 'Ya existe una cuenta con ese email.' };
+    }
+    throw err;
+  }
+
+  try {
+    await db.insert(artists).values({
+      id: crypto.randomUUID(),
+      userId,
+      slug,
+      displayName: slugFromEmail(email),
+      bio: '',
+      links: [],
+      backgroundEffect: 'liquid',
+      trialEndsAt,
+    });
+  } catch (err) {
+    // No multi-statement transactions on the Neon HTTP driver — clean up by
+    // hand so a failed artist insert never leaves an orphaned user row.
+    await db.delete(users).where(eq(users.id, userId));
+    await releaseInviteCode(code);
+    return { error: 'No pudimos crear tu perfil. Intentá de nuevo.' };
+  }
 
   await signIn('credentials', { email, password, redirectTo: '/dashboard' });
   return {};

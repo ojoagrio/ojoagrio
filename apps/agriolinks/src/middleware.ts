@@ -11,7 +11,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
   // auth.ts pulls in bcryptjs + jose, both Node-only — run on the Node.js
   // runtime (Fluid Compute) instead of Edge to avoid the missing-API warnings.
   runtime: 'nodejs',

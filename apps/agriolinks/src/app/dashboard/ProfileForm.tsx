@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import { SocialIcon, type SocialType } from '@ojoagrio/ui';
@@ -33,7 +34,15 @@ function daysLeft(trialEndsAt: Date | null): number | null {
   return Math.ceil((trialEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
 }
 
-export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; userId: string }) {
+export function ProfileForm({
+  artist,
+  userId,
+  isAdmin = false,
+}: {
+  artist: OwnArtistProfile;
+  userId: string;
+  isAdmin?: boolean;
+}) {
   const [state, formAction, pending] = useActionState(saveProfile, initialState);
   const [backgroundEffect, setBackgroundEffect] = useState(artist.backgroundEffect);
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl);
@@ -70,6 +79,11 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
               👁️ Ver mi página
             </button>
             <ShareButton path={publicPath} title={artist.displayName} />
+            {isAdmin && (
+              <Link className="dash-btn-secondary" href="/admin">
+                🔑 Admin
+              </Link>
+            )}
           </div>
         </div>
         <p className="dash-url">

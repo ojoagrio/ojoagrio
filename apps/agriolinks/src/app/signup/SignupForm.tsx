@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState } from 'react';
 import { signup, type SignupState } from './actions';
 
@@ -38,6 +39,12 @@ export function SignupForm({ defaultCode }: { defaultCode: string }) {
           {pending ? 'Creando cuenta…' : 'Crear cuenta'}
         </button>
       </form>
+      <p className="bio">
+        ¿Ya tenés cuenta? <Link href="/login">Iniciá sesión</Link>
+      </p>
+      <Link className="section-label" href="/">
+        ← Volver al inicio
+      </Link>
     </main>
   );
 }

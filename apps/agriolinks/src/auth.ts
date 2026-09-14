@@ -5,6 +5,11 @@ import { eq } from 'drizzle-orm';
 import { getDb } from './db';
 import { users } from './db/schema';
 
+// A bcrypt hash with no matching plaintext — compared against when the email
+// doesn't exist, so authorize() takes roughly the same time either way and
+// can't be used to enumerate registered emails via response timing.
+const DUMMY_HASH = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8bBn0BdM/1Xa2Xj/DkYVCP.4CIQ8mm';
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Next's own `basePath` (/agriolinks, in next.config.mjs) is stripped by
   // Next itself before this code ever sees the request — internally the
@@ -26,10 +31,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const rows = await getDb().select().from(users).where(eq(users.email, email)).limit(1);
         const user = rows[0];
-        if (!user) return null;
 
-        const valid = await compare(password, user.passwordHash);
-        if (!valid) return null;
+        const valid = await compare(password, user?.passwordHash ?? DUMMY_HASH);
+        if (!user || !valid) return null;
 
         return { id: user.id, email: user.email };
       },

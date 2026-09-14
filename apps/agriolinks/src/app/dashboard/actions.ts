@@ -17,6 +17,24 @@ export interface SaveProfileState {
 const SOCIAL_TYPES: SocialType[] = ['instagram', 'tiktok', 'spotify', 'youtube'];
 const BACKGROUND_EFFECTS = ['liquid', 'fog', 'cells', 'net', 'halo', 'globe'];
 
+function isValidLinkHref(href: string): boolean {
+  try {
+    const url = new URL(href);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function isValidBlobUrl(href: string): boolean {
+  try {
+    const url = new URL(href);
+    return url.protocol === 'https:' && url.hostname.endsWith('.public.blob.vercel-storage.com');
+  } catch {
+    return false;
+  }
+}
+
 export async function saveProfile(_prevState: SaveProfileState, formData: FormData): Promise<SaveProfileState> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -43,7 +61,7 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   if (!BACKGROUND_EFFECTS.includes(backgroundEffect)) {
     return { error: 'Fondo inválido.' };
   }
-  if (avatarUrl && !avatarUrl.includes('.blob.vercel-storage.com/')) {
+  if (avatarUrl && !isValidBlobUrl(avatarUrl)) {
     return { error: 'Foto de perfil inválida.' };
   }
 
@@ -51,6 +69,9 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   for (const type of SOCIAL_TYPES) {
     const href = String(formData.get(`link_${type}_href`) ?? '').trim();
     if (!href) continue;
+    if (!isValidLinkHref(href)) {
+      return { error: `El link de ${type} tiene que empezar con http:// o https://.` };
+    }
     const label = String(formData.get(`link_${type}_label`) ?? type);
     const sub = String(formData.get(`link_${type}_sub`) ?? '');
     links.push({ type, href, label, sub });
