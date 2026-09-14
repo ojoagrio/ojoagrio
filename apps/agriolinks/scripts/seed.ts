@@ -22,10 +22,20 @@ async function main() {
 
   await db
     .insert(inviteCodes)
-    .values({ code: 'AGRIO2026', note: 'Primer código de prueba' })
+    .values({ code: 'AGRIO2026', maxUses: 1, trialDays: 30, note: 'Primer código de prueba' })
     .onConflictDoNothing();
 
-  console.log('Seed listo: artista "demo" y código de invitación "AGRIO2026".');
+  await db
+    .insert(inviteCodes)
+    .values({
+      code: 'AGRIOFREE',
+      maxUses: null,
+      trialDays: 30,
+      note: 'Código público de campaña — botón de la landing, 1 mes gratis, uso ilimitado',
+    })
+    .onConflictDoNothing();
+
+  console.log('Seed listo: artista "demo", código "AGRIO2026" (1 uso) y "AGRIOFREE" (campaña, ilimitado).');
 }
 
 main()

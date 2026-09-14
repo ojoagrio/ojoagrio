@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getDb } from '@/db';
 import { artists } from '@/db/schema';
 import { auth, signOut } from '@/auth';
+import { isTrialExpired } from '@/lib/artists';
 import type { ArtistLink } from '@/lib/types';
 import type { SocialType } from '@ojoagrio/ui';
 
@@ -20,6 +21,15 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   const session = await auth();
   if (!session?.user?.id) {
     return { error: 'Tenés que iniciar sesión de nuevo.' };
+  }
+
+  const [current] = await getDb()
+    .select({ trialEndsAt: artists.trialEndsAt })
+    .from(artists)
+    .where(eq(artists.userId, session.user.id))
+    .limit(1);
+  if (current && isTrialExpired(current.trialEndsAt)) {
+    return { error: 'Tu mes gratis terminó — renová tu plan para seguir editando.' };
   }
 
   const displayName = String(formData.get('displayName') ?? '').trim();
@@ -51,10 +61,10 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
     .set({ displayName, bio, backgroundEffect, avatarUrl, links })
     .where(eq(artists.userId, session.user.id));
 
-  revalidatePath('/agriolinks/dashboard');
+  revalidatePath('/dashboard');
   return { saved: true };
 }
 
 export async function logout() {
-  await signOut({ redirectTo: '/agriolinks' });
+  await signOut({ redirectTo: '/' });
 }

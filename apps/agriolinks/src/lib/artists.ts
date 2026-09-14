@@ -14,6 +14,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     bio: row.bio,
     avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
+    trialEndsAt: row.trialEndsAt,
   };
 }
 
@@ -33,5 +34,11 @@ export async function getArtistByUserId(userId: string): Promise<OwnArtistProfil
     avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
     backgroundEffect: row.backgroundEffect,
+    trialEndsAt: row.trialEndsAt,
   };
+}
+
+/** True once trialEndsAt has passed. An artist with no tracked trial (null) never expires. */
+export function isTrialExpired(trialEndsAt: Date | null): boolean {
+  return trialEndsAt !== null && trialEndsAt.getTime() < Date.now();
 }

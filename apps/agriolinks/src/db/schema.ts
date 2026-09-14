@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, jsonb, integer } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -9,16 +9,19 @@ export const users = pgTable('users', {
 
 export type User = typeof users.$inferSelect;
 
-export const inviteCodeStatus = pgEnum('invite_code_status', ['unused', 'used']);
-
 export const inviteCodes = pgTable('invite_codes', {
   code: text('code').primaryKey(),
-  status: inviteCodeStatus('status').notNull().default('unused'),
-  usedBy: text('used_by'),
+  // null = unlimited uses (a public campaign code); a number caps redemptions
+  // (1 = the old single-use invite behavior).
+  maxUses: integer('max_uses').default(1),
+  usesCount: integer('uses_count').notNull().default(0),
+  // Free trial length granted to whoever redeems this code.
+  trialDays: integer('trial_days').notNull().default(30),
   note: text('note'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  usedAt: timestamp('used_at', { withTimezone: true }),
 });
+
+export type InviteCode = typeof inviteCodes.$inferSelect;
 
 export const artists = pgTable('artists', {
   id: text('id').primaryKey(),
@@ -30,9 +33,11 @@ export const artists = pgTable('artists', {
   // Array of { type: 'instagram' | 'tiktok' | 'spotify' | 'youtube', href, label, sub }
   links: jsonb('links').notNull().default([]),
   backgroundEffect: text('background_effect').notNull().default('liquid'),
+  // Null means "no trial tracked" (e.g. the hand-seeded demo artist). Real
+  // signups always get one from the invite code they redeemed.
+  trialEndsAt: timestamp('trial_ends_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
-export type InviteCode = typeof inviteCodes.$inferSelect;

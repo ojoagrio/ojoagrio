@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { SocialButton } from '@ojoagrio/ui';
 import type { ArtistProfile } from '@/lib/types';
 
@@ -5,10 +6,12 @@ interface Props {
   artist: Pick<ArtistProfile, 'displayName' | 'bio' | 'links' | 'avatarUrl'>;
   /** Scroll-in `.reveal` animation only makes sense once, on the real public page. */
   reveal?: boolean;
+  /** True once the artist's trial/plan has expired — shows a limited version instead of the links. */
+  paused?: boolean;
 }
 
 /** The actual public artist page content — shared by /u/[usuario] and the dashboard's inline preview. */
-export function ArtistPublicView({ artist, reveal = true }: Props) {
+export function ArtistPublicView({ artist, reveal = true, paused = false }: Props) {
   const revealClass = reveal ? ' reveal' : '';
   return (
     <main className="wrap">
@@ -27,13 +30,25 @@ export function ArtistPublicView({ artist, reveal = true }: Props) {
         )}
       </div>
       <h1 className={`title display${revealClass}`}>{artist.displayName}</h1>
-      <p className={`bio${revealClass}`}>{artist.bio}</p>
-      <div className="links">
-        {artist.links.map((link) => (
-          <SocialButton key={link.href} {...link} reveal={reveal} />
-        ))}
-      </div>
-      <footer className={revealClass.trim()}>Hecho con AgrioLinks</footer>
+
+      {paused ? (
+        <>
+          <p className={`bio${revealClass}`}>⏸️ {artist.displayName} está renovando su página. Volvé pronto.</p>
+          <Link className="section-label" href="/">
+            🔗 Creado con AgrioLinks
+          </Link>
+        </>
+      ) : (
+        <>
+          <p className={`bio${revealClass}`}>{artist.bio}</p>
+          <div className="links">
+            {artist.links.map((link) => (
+              <SocialButton key={link.href} {...link} reveal={reveal} />
+            ))}
+          </div>
+          <footer className={revealClass.trim()}>Hecho con AgrioLinks</footer>
+        </>
+      )}
     </main>
   );
 }

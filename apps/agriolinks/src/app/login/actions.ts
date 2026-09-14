@@ -16,7 +16,7 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
   }
 
   try {
-    await signIn('credentials', { email, password, redirectTo: '/agriolinks/dashboard' });
+    await signIn('credentials', { email, password, redirectTo: '/dashboard' });
   } catch (err) {
     if (err instanceof AuthError) {
       return { error: 'Email o contraseña incorrectos.' };

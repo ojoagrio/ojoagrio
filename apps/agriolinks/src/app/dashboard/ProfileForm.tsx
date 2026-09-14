@@ -1,12 +1,13 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import type { OwnArtistProfile } from '@/lib/artists';
+import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import { SocialIcon, type SocialType } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
 import { ShareButton } from './ShareButton';
 import { AvatarUpload } from './AvatarUpload';
+import { ComingSoonModal } from './ComingSoonModal';
 import './dashboard.css';
 
 const SOCIAL_TYPES: { type: SocialType; label: string }[] = [
@@ -27,11 +28,20 @@ const BACKGROUND_OPTIONS = [
 
 const initialState: SaveProfileState = {};
 
+function daysLeft(trialEndsAt: Date | null): number | null {
+  if (!trialEndsAt) return null;
+  return Math.ceil((trialEndsAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+}
+
 export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; userId: string }) {
   const [state, formAction, pending] = useActionState(saveProfile, initialState);
   const [backgroundEffect, setBackgroundEffect] = useState(artist.backgroundEffect);
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
+  const expired = isTrialExpired(artist.trialEndsAt);
+  const remaining = daysLeft(artist.trialEndsAt);
 
   const linkByType = Object.fromEntries(artist.links.map((l) => [l.type, l]));
   const publicPath = `/agriolinks/u/${artist.slug}`;
@@ -45,7 +55,7 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
           </button>
           <ShareButton path={publicPath} title={artist.displayName} />
         </div>
-        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} />
+        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} paused={expired} />
       </div>
     );
   }
@@ -66,8 +76,23 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
           ojoagrio.com<strong>{publicPath}</strong>
         </p>
 
+        {remaining !== null && (
+          <div className={`dash-trial-banner ${expired ? 'expired' : 'active'}`}>
+            <span>
+              {expired
+                ? '⏸️ Tu mes gratis terminó — tu página pública quedó limitada hasta que renueves.'
+                : `🎁 Te quedan ${remaining} día${remaining === 1 ? '' : 's'} de tu mes gratis.`}
+            </span>
+            {expired && (
+              <button type="button" className="dash-btn-primary" style={{ flex: '0 0 auto' }} onClick={() => setShowComingSoon(true)}>
+                Comprar plan
+              </button>
+            )}
+          </div>
+        )}
+
         <form action={formAction}>
-          <div className="dash-card">
+          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Perfil</h2>
             <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
             <div className="dash-field">
@@ -100,9 +125,9 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
                 rows={3}
               />
             </div>
-          </div>
+          </fieldset>
 
-          <div className="dash-card">
+          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Fondo animado</h2>
             <input type="hidden" name="backgroundEffect" value={backgroundEffect} />
             <div className="dash-bg-grid">
@@ -118,9 +143,9 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
-          <div className="dash-card">
+          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Tus links</h2>
             {SOCIAL_TYPES.map(({ type, label }) => (
               <div key={type} className="dash-link-card">
@@ -150,21 +175,28 @@ export function ProfileForm({ artist, userId }: { artist: OwnArtistProfile; user
                 </div>
               </div>
             ))}
-          </div>
+          </fieldset>
 
           {state.error && <p className="dash-message error">{state.error}</p>}
           {state.saved && <p className="dash-message success">Guardado ✅</p>}
 
           <div className="dash-actions">
-            <button className="dash-btn-primary" type="submit" disabled={pending}>
-              {pending ? 'Guardando…' : 'Guardar cambios'}
-            </button>
+            {expired ? (
+              <button className="dash-btn-primary" type="button" onClick={() => setShowComingSoon(true)}>
+                Comprar plan
+              </button>
+            ) : (
+              <button className="dash-btn-primary" type="submit" disabled={pending}>
+                {pending ? 'Guardando…' : 'Guardar cambios'}
+              </button>
+            )}
             <button className="dash-btn-secondary" type="button" onClick={() => logout()}>
               Cerrar sesión
             </button>
           </div>
         </form>
       </div>
+      <ComingSoonModal open={showComingSoon} onClose={() => setShowComingSoon(false)} />
     </div>
   );
 }

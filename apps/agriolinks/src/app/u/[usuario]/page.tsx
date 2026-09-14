@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getArtistBySlug } from '@/lib/artists';
+import { getArtistBySlug, isTrialExpired } from '@/lib/artists';
 import { RevealOnMount } from '@/components/RevealOnMount';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 
@@ -15,7 +15,7 @@ export default async function ArtistPage({ params }: Props) {
 
   return (
     <RevealOnMount>
-      <ArtistPublicView artist={artist} />
+      <ArtistPublicView artist={artist} paused={isTrialExpired(artist.trialEndsAt)} />
     </RevealOnMount>
   );
 }

@@ -13,4 +13,6 @@ export interface ArtistProfile {
   bio: string;
   avatarUrl: string | null;
   links: ArtistLink[];
+  /** Null means no trial is tracked for this artist (e.g. the seeded demo). */
+  trialEndsAt: Date | null;
 }

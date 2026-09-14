@@ -52,7 +52,7 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
     return { error: 'Ya existe una cuenta con ese email.' };
   }
 
-  const claimed = await claimInviteCode(code, email);
+  const claimed = await claimInviteCode(code);
   if (!claimed) {
     return { error: 'Ese código de invitación no es válido o ya fue usado.' };
   }
@@ -60,6 +60,7 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
   const userId = crypto.randomUUID();
   const passwordHash = await hash(password, 10);
   const slug = await uniqueSlug(slugFromEmail(email));
+  const trialEndsAt = new Date(Date.now() + claimed.trialDays * 24 * 60 * 60 * 1000);
 
   await db.insert(users).values({ id: userId, email, passwordHash });
   await db.insert(artists).values({
@@ -70,8 +71,9 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
     bio: '',
     links: [],
     backgroundEffect: 'liquid',
+    trialEndsAt,
   });
 
-  await signIn('credentials', { email, password, redirectTo: '/agriolinks/dashboard' });
+  await signIn('credentials', { email, password, redirectTo: '/dashboard' });
   return {};
 }
