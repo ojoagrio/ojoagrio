@@ -1,16 +1,20 @@
-// TODO(paso 6 del plan): proteger esta ruta con la sesión de NextAuth y
-// cargar/guardar la fila real de `artists` del usuario logueado.
-export default function DashboardPage() {
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { getArtistByUserId } from '@/lib/artists';
+import { ProfileForm } from './ProfileForm';
+
+export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect('/agriolinks/login');
+
+  const artist = await getArtistByUserId(session.user.id);
+  if (!artist) redirect('/agriolinks/login');
+
   return (
     <main className="wrap">
       <h1 className="title display">Tu página</h1>
-      <p className="bio">Acá vas a poder editar tu bio, tus links y elegir tu fondo animado.</p>
-      <form className="links">
-        <input className="link-btn" name="bio" placeholder="Bio" />
-        <button className="link-btn" type="submit">
-          Guardar
-        </button>
-      </form>
+      <p className="bio">Editá tu bio, tus links y tu fondo animado. Los cambios se ven al toque en tu página pública.</p>
+      <ProfileForm artist={artist} />
     </main>
   );
 }

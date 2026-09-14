@@ -15,3 +15,21 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     links: row.links as ArtistLink[],
   };
 }
+
+export interface OwnArtistProfile extends ArtistProfile {
+  backgroundEffect: string;
+}
+
+export async function getArtistByUserId(userId: string): Promise<OwnArtistProfile | null> {
+  const rows = await getDb().select().from(artists).where(eq(artists.userId, userId)).limit(1);
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    slug: row.slug,
+    displayName: row.displayName,
+    bio: row.bio,
+    links: row.links as ArtistLink[],
+    backgroundEffect: row.backgroundEffect,
+  };
+}

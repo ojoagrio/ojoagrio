@@ -1,13 +1,22 @@
-// TODO(paso 5 del plan): reemplazar por el login real con NextAuth Credentials.
+'use client';
+
+import { useActionState } from 'react';
+import { login, type LoginState } from './actions';
+
+const initialState: LoginState = {};
+
 export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(login, initialState);
+
   return (
     <main className="wrap">
       <h1 className="title display">Iniciar sesión</h1>
-      <form className="links">
+      <form className="links" action={formAction}>
         <input className="link-btn" name="email" type="email" placeholder="Email" required />
         <input className="link-btn" name="password" type="password" placeholder="Contraseña" required />
-        <button className="link-btn" type="submit">
-          Entrar
+        {state.error && <p className="bio">{state.error}</p>}
+        <button className="link-btn" type="submit" disabled={pending}>
+          {pending ? 'Entrando…' : 'Entrar'}
         </button>
       </form>
     </main>
