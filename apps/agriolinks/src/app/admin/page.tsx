@@ -30,7 +30,7 @@ export default async function AdminPage() {
             <div className="dash-code-row" key={c.code}>
               <span className="dash-code-name">{c.code}</span>
               <span className="dash-code-meta">
-                {c.usesCount} / {c.maxUses ?? '∞'} usos · {c.trialDays} días
+                {c.usesCount} / {c.maxUses ?? '∞'} usos · {c.trialDays} días · {c.maxProducts} productos
                 {c.note ? ` · ${c.note}` : ''}
               </span>
             </div>

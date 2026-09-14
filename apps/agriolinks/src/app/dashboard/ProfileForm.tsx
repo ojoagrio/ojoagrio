@@ -79,6 +79,9 @@ export function ProfileForm({
               👁️ Ver mi página
             </button>
             <ShareButton path={publicPath} title={artist.displayName} />
+            <Link className="dash-btn-secondary" href="/dashboard/tienda">
+              🛍️ Tienda
+            </Link>
             {isAdmin && (
               <Link className="dash-btn-secondary" href="/admin">
                 🔑 Admin

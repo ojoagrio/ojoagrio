@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { artists } from '@/db/schema';
-import type { ArtistProfile, ArtistLink } from './types';
+import type { ArtistProfile, ArtistLink, Product } from './types';
 
 export async function getArtistBySlug(slug: string): Promise<ArtistProfile | null> {
   const rows = await getDb().select().from(artists).where(eq(artists.slug, slug)).limit(1);
@@ -14,6 +14,9 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     bio: row.bio,
     avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
+    products: row.products as Product[],
+    whatsappNumber: row.whatsappNumber,
+    maxProducts: row.maxProducts,
     trialEndsAt: row.trialEndsAt,
   };
 }
@@ -33,6 +36,9 @@ export async function getArtistByUserId(userId: string): Promise<OwnArtistProfil
     bio: row.bio,
     avatarUrl: row.avatarUrl,
     links: row.links as ArtistLink[],
+    products: row.products as Product[],
+    whatsappNumber: row.whatsappNumber,
+    maxProducts: row.maxProducts,
     backgroundEffect: row.backgroundEffect,
     trialEndsAt: row.trialEndsAt,
   };

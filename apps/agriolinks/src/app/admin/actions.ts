@@ -27,6 +27,7 @@ export async function createInviteCode(_prevState: CreateCodeState, formData: Fo
     .toUpperCase();
   const maxUsesRaw = String(formData.get('maxUses') ?? '').trim();
   const trialDaysRaw = String(formData.get('trialDays') ?? '').trim();
+  const maxProductsRaw = String(formData.get('maxProducts') ?? '').trim();
   const note = String(formData.get('note') ?? '').trim() || null;
 
   if (!/^[A-Z0-9-]{3,32}$/.test(code)) {
@@ -36,6 +37,11 @@ export async function createInviteCode(_prevState: CreateCodeState, formData: Fo
   const trialDays = trialDaysRaw ? Number(trialDaysRaw) : 30;
   if (!Number.isInteger(trialDays) || trialDays <= 0) {
     return { error: 'Los días de prueba tienen que ser un número entero positivo.' };
+  }
+
+  const maxProducts = maxProductsRaw ? Number(maxProductsRaw) : 6;
+  if (!Number.isInteger(maxProducts) || maxProducts < 0) {
+    return { error: 'El máximo de productos tiene que ser un número entero (0 o más).' };
   }
 
   let maxUses: number | null = 1;
@@ -50,7 +56,7 @@ export async function createInviteCode(_prevState: CreateCodeState, formData: Fo
   }
 
   try {
-    await getDb().insert(inviteCodes).values({ code, maxUses, trialDays, note });
+    await getDb().insert(inviteCodes).values({ code, maxUses, trialDays, maxProducts, note });
   } catch (err) {
     if (isUniqueViolation(err)) {
       return { error: 'Ya existe un código con ese nombre.' };

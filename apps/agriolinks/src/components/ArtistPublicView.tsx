@@ -3,7 +3,7 @@ import { SocialButton } from '@ojoagrio/ui';
 import type { ArtistProfile } from '@/lib/types';
 
 interface Props {
-  artist: Pick<ArtistProfile, 'displayName' | 'bio' | 'links' | 'avatarUrl'>;
+  artist: Pick<ArtistProfile, 'displayName' | 'bio' | 'links' | 'avatarUrl' | 'slug' | 'products'>;
   /** Scroll-in `.reveal` animation only makes sense once, on the real public page. */
   reveal?: boolean;
   /** True once the artist's trial/plan has expired — shows a limited version instead of the links. */
@@ -45,6 +45,11 @@ export function ArtistPublicView({ artist, reveal = true, paused = false }: Prop
             {artist.links.map((link) => (
               <SocialButton key={link.href} {...link} reveal={reveal} />
             ))}
+            {artist.products.length > 0 && (
+              <Link className={`link-btn${revealClass}`} href={`/u/${artist.slug}/tienda`}>
+                🛍️ Ver tienda
+              </Link>
+            )}
           </div>
           <footer className={revealClass.trim()}>Hecho con AgrioLinks</footer>
         </>

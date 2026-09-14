@@ -39,6 +39,13 @@ export function AdminCodesForm() {
       </div>
 
       <div className="dash-field">
+        <label className="dash-label" htmlFor="maxProducts">
+          Máximo de productos en la tienda
+        </label>
+        <input className="dash-input" id="maxProducts" name="maxProducts" type="number" min={0} defaultValue={6} />
+      </div>
+
+      <div className="dash-field">
         <label className="dash-label" htmlFor="note">
           Nota (para vos, no la ve el artista)
         </label>

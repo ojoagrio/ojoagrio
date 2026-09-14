@@ -87,6 +87,7 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
       links: [],
       backgroundEffect: 'liquid',
       trialEndsAt,
+      maxProducts: claimed.maxProducts,
     });
   } catch (err) {
     // No multi-statement transactions on the Neon HTTP driver — clean up by

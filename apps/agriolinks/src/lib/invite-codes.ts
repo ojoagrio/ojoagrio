@@ -10,7 +10,7 @@ import { inviteCodes } from '@/db/schema';
  * never push usesCount past maxUses. Returns the trial length to grant, or
  * null if the code doesn't exist or is exhausted.
  */
-export async function claimInviteCode(code: string): Promise<{ trialDays: number } | null> {
+export async function claimInviteCode(code: string): Promise<{ trialDays: number; maxProducts: number } | null> {
   const result = await getDb()
     .update(inviteCodes)
     .set({ usesCount: sql`${inviteCodes.usesCount} + 1` })
@@ -20,7 +20,7 @@ export async function claimInviteCode(code: string): Promise<{ trialDays: number
         or(isNull(inviteCodes.maxUses), lt(inviteCodes.usesCount, inviteCodes.maxUses))
       )
     )
-    .returning({ trialDays: inviteCodes.trialDays });
+    .returning({ trialDays: inviteCodes.trialDays, maxProducts: inviteCodes.maxProducts });
 
   return result[0] ?? null;
 }

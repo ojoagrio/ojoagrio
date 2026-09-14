@@ -36,11 +36,14 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
   const [isEmbedded, setIsEmbedded] = useState(false);
 
   // The landing page ("/") gets a fixed, curated background with no picker —
-  // everywhere else keeps the full switcher.
+  // everywhere else keeps the full switcher. The minimalist "tienda" product
+  // pages opt out of the animated background entirely (their own flat dark
+  // background lives in tienda.css).
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
+  const isStorePage = pathname?.endsWith('/tienda') ?? false;
   const allowedModes = isLandingPage ? LANDING_MODES : MODES;
-  const showPicker = !isLandingPage;
+  const showPicker = !isLandingPage && !isStorePage;
 
   useEffect(() => {
     try {
@@ -52,7 +55,7 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
 
   useEffect(() => {
     const vantaEl = vantaElRef.current;
-    if (!vantaEl || isEmbedded) return;
+    if (!vantaEl || isEmbedded || isStorePage) return;
     const select = selectRef.current;
 
     let vantaEffect: { destroy: () => void } | null = null;
@@ -222,7 +225,13 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
       if (autoTimer) clearInterval(autoTimer);
       stopAll();
     };
-  }, [isEmbedded, isLandingPage, allowedModes]);
+  }, [isEmbedded, isLandingPage, isStorePage, allowedModes]);
+
+  if (isStorePage) {
+    // The tienda pages render their own flat dark background (tienda.css) —
+    // no bg-layer, no switcher, no Vanta/Three.js load at all.
+    return null;
+  }
 
   if (isEmbedded) {
     return (
