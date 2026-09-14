@@ -1,0 +1,265 @@
+/* Minimalist "tienda" (product catalog) design system — deliberately
+   distinct from the comic-book look of the rest of AgrioLinks
+   (packages/ui/global.css), closer to arttoys.ojoagrio.com's clean,
+   neon-on-dark catalog look. Shared by the public /u/[usuario]/tienda page
+   (below) and the dashboard's tienda editor (the .tienda-dash overrides
+   further down), so artists edit their catalog in the same visual system
+   their customers see it in. No Vanta background on either — the public
+   page opts out via BackgroundSwitcher, the dashboard editor via its own
+   flat background here. */
+
+.tienda-wrap {
+  min-height: 100vh;
+  background: #0d0d14;
+  color: #f2f2f7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 32px 20px 64px;
+}
+
+.tienda-header {
+  max-width: 960px;
+  margin: 0 auto 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.tienda-back {
+  color: #9a9ab0;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.tienda-back:hover {
+  color: #f2f2f7;
+}
+
+.tienda-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0;
+  background: linear-gradient(90deg, #2ec4b6, #e4007c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tienda-paused {
+  text-align: center;
+  color: #9a9ab0;
+  max-width: 420px;
+  margin: 60px auto;
+}
+
+.tienda-grid {
+  max-width: 960px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.tienda-card {
+  background: #16161f;
+  border: 1px solid #26263a;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tienda-photo {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: #0d0d14;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.tienda-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tienda-photo-placeholder {
+  font-size: 2rem;
+  opacity: 0.4;
+}
+
+.tienda-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tienda-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #2ec4b6;
+  margin: 0;
+}
+
+.tienda-availability {
+  font-size: 0.78rem;
+  color: #9a9ab0;
+  margin: 0;
+}
+
+.tienda-description {
+  font-size: 0.85rem;
+  color: #c4c4d4;
+  line-height: 1.4;
+  margin: 4px 0 0;
+}
+
+.tienda-buy {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #25d366;
+  color: #0d0d14;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  transition: transform 0.15s ease;
+}
+
+.tienda-buy:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .tienda-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 460px) {
+  .tienda-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------- *
+ * Dashboard editor theme: restyles the shared dash-* classes (defined in
+ * apps/agriolinks/src/app/dashboard/dashboard.css) to the same dark/neon
+ * palette as the public tienda above, scoped under .tienda-dash so it
+ * doesn't leak into the (intentionally light/comic) main dashboard.
+ * ---------------------------------------------------------------------- */
+
+.tienda-dash.dash-page,
+.tienda-dash.dash-preview-shell {
+  background: #0d0d14;
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-title {
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-url {
+  color: #9a9ab0;
+}
+
+.tienda-dash .dash-url strong {
+  color: #2ec4b6;
+}
+
+.tienda-dash .dash-card {
+  background: #16161f;
+  border-color: #26263a;
+  box-shadow: none;
+}
+
+.tienda-dash .dash-section-title {
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-label {
+  color: #9a9ab0;
+}
+
+.tienda-dash .dash-input,
+.tienda-dash .dash-textarea {
+  background: #0d0d14;
+  border-color: #26263a;
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-input::placeholder,
+.tienda-dash .dash-textarea::placeholder {
+  color: #5c5c70;
+}
+
+.tienda-dash .dash-input:focus,
+.tienda-dash .dash-textarea:focus {
+  background: #0d0d14;
+  border-color: #2ec4b6;
+  box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.18);
+}
+
+.tienda-dash .dash-btn-secondary {
+  border-color: #333349;
+  color: #c4c4d4;
+}
+
+.tienda-dash .dash-btn-secondary:hover {
+  background: #1e1e2b;
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-preview-link {
+  background: #2ec4b6;
+  color: #0d0d14;
+}
+
+.tienda-dash .dash-preview-link:hover {
+  background: #29ab9f;
+}
+
+.tienda-dash .dash-photo-thumb,
+.tienda-dash .dash-photo-add,
+.tienda-dash .dash-product-thumb {
+  background: #0d0d14;
+  border-color: #26263a;
+}
+
+.tienda-dash .dash-photo-add {
+  color: #9a9ab0;
+}
+
+.tienda-dash .dash-product-name {
+  color: #f2f2f7;
+}
+
+.tienda-dash .dash-product-meta {
+  color: #9a9ab0;
+}
+
+.tienda-dash .dash-product-card.dash-product-card-editing {
+  border-color: rgba(46, 196, 182, 0.4);
+  box-shadow: 0 10px 28px rgba(46, 196, 182, 0.12);
+}
+
+.tienda-dash .dash-trial-banner.active {
+  background: rgba(46, 196, 182, 0.12);
+  color: #6fe0d3;
+  border-color: rgba(46, 196, 182, 0.3);
+}
+
+.tienda-dash .dash-trial-banner.expired {
+  background: rgba(228, 0, 124, 0.14);
+  color: #ff5fb3;
+  border-color: rgba(228, 0, 124, 0.35);
+}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { ArtistProfile } from '@/lib/types';
-import '@/app/u/[usuario]/tienda/tienda.css';
+import '@/styles/tienda.css';
 
 interface Props {
   artist: Pick<ArtistProfile, 'displayName' | 'slug' | 'products' | 'whatsappNumber'>;

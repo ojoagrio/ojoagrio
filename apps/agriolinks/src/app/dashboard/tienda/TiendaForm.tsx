@@ -3,11 +3,13 @@
 import { useActionState, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import type { Product } from '@/lib/types';
+import { TiendaPublicView } from '@/components/TiendaPublicView';
 import { ShareButton } from '../ShareButton';
 import { ComingSoonModal } from '../ComingSoonModal';
 import { ProductPhotosUpload } from './ProductPhotosUpload';
 import { saveTienda, type SaveTiendaState } from './actions';
 import '../dashboard.css';
+import '@/styles/tienda.css';
 
 const initialState: SaveTiendaState = {};
 
@@ -18,8 +20,10 @@ function emptyProduct(): Product {
 export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userId: string }) {
   const [state, formAction, pending] = useActionState(saveTienda, initialState);
   const [products, setProducts] = useState<Product[]>(artist.products);
+  const [whatsappNumber, setWhatsappNumber] = useState(artist.whatsappNumber ?? '');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
+  const [view, setView] = useState<'edit' | 'preview'>('edit');
 
   const expired = isTrialExpired(artist.trialEndsAt);
   const publicPath = `/agriolinks/u/${artist.slug}/tienda`;
@@ -41,12 +45,29 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
     setProducts(products.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
   }
 
+  if (view === 'preview') {
+    return (
+      <div className="dash-preview-shell tienda-dash">
+        <div className="dash-preview-bar">
+          <button type="button" className="dash-preview-back" onClick={() => setView('edit')}>
+            ← Volver a editar
+          </button>
+          <ShareButton path={publicPath} title={`Tienda de ${artist.displayName}`} />
+        </div>
+        <TiendaPublicView artist={{ ...artist, products, whatsappNumber }} paused={expired} />
+      </div>
+    );
+  }
+
   return (
-    <div className="dash-page">
+    <div className="dash-page tienda-dash">
       <div className="dash-container">
         <div className="dash-topbar">
           <h1 className="dash-title">Tu tienda</h1>
           <div className="dash-topbar-actions">
+            <button type="button" className="dash-preview-link" onClick={() => setView('preview')}>
+              👁️ Ver mi tienda
+            </button>
             <ShareButton path={publicPath} title={`Tienda de ${artist.displayName}`} />
           </div>
         </div>
@@ -81,7 +102,8 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                 id="whatsappNumber"
                 className="dash-input"
                 name="whatsappNumber"
-                defaultValue={artist.whatsappNumber ?? ''}
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
                 placeholder="521XXXXXXXXXX"
               />
             </div>

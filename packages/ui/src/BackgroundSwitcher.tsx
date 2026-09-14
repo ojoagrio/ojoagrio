@@ -195,6 +195,11 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
 
     function restartAutoCycle() {
       if (autoTimer) clearInterval(autoTimer);
+      // Pages with a manual picker (login, signup, dashboard, the artist's
+      // own page) keep whatever background is active — the first default or
+      // whatever the user picked — fixed, with no auto-advance. Only the
+      // landing's curated, picker-less background cycles on a timer.
+      if (showPicker) return;
       autoTimer = setInterval(() => {
         const idx = allowedModes.indexOf(currentModeRef.current);
         const next = allowedModes[(idx + 1) % allowedModes.length];
