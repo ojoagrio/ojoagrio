@@ -106,16 +106,15 @@
   margin-bottom: 6px;
 }
 
-.dash-avatar-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.dash-avatar-circle-wrap {
+  position: relative;
+  width: 96px;
+  margin: 0 auto;
 }
 
 .dash-avatar-preview {
-  flex-shrink: 0;
-  width: 64px;
-  height: 64px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   overflow: hidden;
   background: #fdfbf8;
@@ -132,7 +131,51 @@
 }
 
 .dash-avatar-placeholder {
-  font-size: 1.5rem;
+  font-size: 2rem;
+}
+
+.dash-avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: var(--rosa);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(228, 0, 124, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.dash-avatar-edit:hover {
+  transform: scale(1.08);
+}
+
+/* Avatar crop modal */
+.dash-crop-modal {
+  max-width: 420px;
+}
+
+.dash-crop-area {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: #16161f;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.dash-crop-zoom {
+  width: 100%;
+  margin-bottom: 18px;
+  accent-color: var(--rosa);
 }
 
 .dash-input,
