@@ -3,7 +3,9 @@
 import { useActionState, useState } from 'react';
 import type { OwnArtistProfile } from '@/lib/artists';
 import { SocialIcon, type SocialType } from '@ojoagrio/ui';
+import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
+import { ShareButton } from './ShareButton';
 import './dashboard.css';
 
 const SOCIAL_TYPES: { type: SocialType; label: string }[] = [
@@ -27,18 +29,36 @@ const initialState: SaveProfileState = {};
 export function ProfileForm({ artist }: { artist: OwnArtistProfile }) {
   const [state, formAction, pending] = useActionState(saveProfile, initialState);
   const [backgroundEffect, setBackgroundEffect] = useState(artist.backgroundEffect);
+  const [view, setView] = useState<'edit' | 'preview'>('edit');
 
   const linkByType = Object.fromEntries(artist.links.map((l) => [l.type, l]));
   const publicPath = `/agriolinks/u/${artist.slug}`;
+
+  if (view === 'preview') {
+    return (
+      <div className="dash-preview-shell">
+        <div className="dash-preview-bar">
+          <button type="button" className="dash-preview-back" onClick={() => setView('edit')}>
+            ← Volver a editar
+          </button>
+          <ShareButton path={publicPath} title={artist.displayName} />
+        </div>
+        <ArtistPublicView artist={artist} reveal={false} />
+      </div>
+    );
+  }
 
   return (
     <div className="dash-page">
       <div className="dash-container">
         <div className="dash-topbar">
           <h1 className="dash-title">Tu página</h1>
-          <a className="dash-preview-link" href={publicPath} target="_blank" rel="noopener noreferrer">
-            👁️ Ver mi página
-          </a>
+          <div className="dash-topbar-actions">
+            <button type="button" className="dash-preview-link" onClick={() => setView('preview')}>
+              👁️ Ver mi página
+            </button>
+            <ShareButton path={publicPath} title={artist.displayName} />
+          </div>
         </div>
         <p className="dash-url">
           ojoagrio.com<strong>{publicPath}</strong>
