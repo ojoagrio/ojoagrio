@@ -6,7 +6,28 @@
       "persistent": true
     },
     "build": {
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_URL_UNPOOLED",
+        "PGHOST",
+        "PGHOST_UNPOOLED",
+        "PGDATABASE",
+        "PGUSER",
+        "PGPASSWORD",
+        "POSTGRES_URL",
+        "POSTGRES_URL_NON_POOLING",
+        "POSTGRES_URL_NO_SSL",
+        "POSTGRES_PRISMA_URL",
+        "POSTGRES_HOST",
+        "POSTGRES_DATABASE",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "NEON_PROJECT_ID",
+        "NEON_AUTH_BASE_URL",
+        "VITE_NEON_AUTH_URL",
+        "AUTH_SECRET"
+      ]
     },
     "preview": {
       "cache": false,
