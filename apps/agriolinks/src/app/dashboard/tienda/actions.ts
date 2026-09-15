@@ -10,6 +10,8 @@ import type { Product } from '@/lib/types';
 
 export interface SaveTiendaState {
   error?: string;
+  /** Per-field messages, keyed e.g. "whatsappNumber" or "product_2_price" — lets the UI point at exactly which product/field failed instead of one generic message. */
+  fieldErrors?: Record<string, string>;
   saved?: boolean;
 }
 
@@ -40,10 +42,12 @@ export async function saveTienda(_prevState: SaveTiendaState, formData: FormData
     return { error: 'Tu mes gratis terminó — renová tu plan para seguir editando.' };
   }
 
+  const fieldErrors: Record<string, string> = {};
+
   const whatsappRaw = String(formData.get('whatsappNumber') ?? '').trim();
   const whatsappDigits = whatsappRaw.replace(/\D/g, '');
   if (whatsappRaw && (whatsappDigits.length < 10 || whatsappDigits.length > 15)) {
-    return { error: 'El número de WhatsApp tiene que tener entre 10 y 15 dígitos, con código de país.' };
+    fieldErrors.whatsappNumber = 'Tiene que tener entre 10 y 15 dígitos, con código de país.';
   }
 
   const productCount = Number(formData.get('productCount') ?? 0);
@@ -54,6 +58,8 @@ export async function saveTienda(_prevState: SaveTiendaState, formData: FormData
     return { error: `Tu plan permite hasta ${current.maxProducts} productos.` };
   }
 
+  // Validate every product before bailing, so the UI can point at every
+  // failing product/field at once instead of just the first one found.
   const products: Product[] = [];
   for (let i = 0; i < productCount; i++) {
     const id = String(formData.get(`product_${i}_id`) ?? '').trim() || crypto.randomUUID();
@@ -64,17 +70,17 @@ export async function saveTienda(_prevState: SaveTiendaState, formData: FormData
     const photosRaw = String(formData.get(`product_${i}_photos`) ?? '[]');
 
     if (!name) {
-      return { error: `El producto ${i + 1} necesita un nombre.` };
+      fieldErrors[`product_${i}_name`] = 'El producto necesita un nombre.';
     }
 
     const price = Number(priceRaw);
     if (!Number.isInteger(price) || price < 0) {
-      return { error: `El precio del producto "${name}" tiene que ser un número entero mayor o igual a 0.` };
+      fieldErrors[`product_${i}_price`] = 'Tiene que ser un número entero mayor o igual a 0.';
     }
 
     const available = Number(availableRaw);
     if (!Number.isInteger(available) || available < 0) {
-      return { error: `La disponibilidad del producto "${name}" tiene que ser un número entero mayor o igual a 0.` };
+      fieldErrors[`product_${i}_available`] = 'Tiene que ser un número entero mayor o igual a 0.';
     }
 
     let photos: unknown;
@@ -84,10 +90,15 @@ export async function saveTienda(_prevState: SaveTiendaState, formData: FormData
       photos = [];
     }
     if (!Array.isArray(photos) || !photos.every((p) => typeof p === 'string' && isValidPhotoUrl(p))) {
-      return { error: `Las fotos del producto "${name}" no son válidas.` };
+      fieldErrors[`product_${i}_photos`] = 'Las fotos no son válidas.';
+      photos = [];
     }
 
-    products.push({ id, name, price, available, description, photos: photos.slice(0, 3) });
+    products.push({ id, name, price, available, description, photos: (photos as string[]).slice(0, 3) });
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { fieldErrors };
   }
 
   await getDb()

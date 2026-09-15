@@ -11,6 +11,8 @@ import type { SocialType } from '@ojoagrio/ui';
 
 export interface SaveProfileState {
   error?: string;
+  /** Per-field messages, keyed by field name (e.g. "displayName", "link_instagram") — shown next to the field instead of a single generic message. */
+  fieldErrors?: Record<string, string>;
   saved?: boolean;
 }
 
@@ -55,14 +57,16 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   const backgroundEffect = String(formData.get('backgroundEffect') ?? 'liquid');
   const avatarUrl = String(formData.get('avatarUrl') ?? '').trim() || null;
 
+  const fieldErrors: Record<string, string> = {};
+
   if (!displayName) {
-    return { error: 'El nombre no puede estar vacío.' };
+    fieldErrors.displayName = 'El nombre no puede estar vacío.';
   }
   if (!BACKGROUND_EFFECTS.includes(backgroundEffect)) {
-    return { error: 'Fondo inválido.' };
+    fieldErrors.backgroundEffect = 'Fondo inválido.';
   }
   if (avatarUrl && !isValidBlobUrl(avatarUrl)) {
-    return { error: 'Foto de perfil inválida.' };
+    fieldErrors.avatarUrl = 'Foto de perfil inválida.';
   }
 
   const links: ArtistLink[] = [];
@@ -70,11 +74,16 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
     const href = String(formData.get(`link_${type}_href`) ?? '').trim();
     if (!href) continue;
     if (!isValidLinkHref(href)) {
-      return { error: `El link de ${type} tiene que empezar con http:// o https://.` };
+      fieldErrors[`link_${type}`] = 'Tiene que empezar con http:// o https://.';
+      continue;
     }
     const label = String(formData.get(`link_${type}_label`) ?? type);
     const sub = String(formData.get(`link_${type}_sub`) ?? '');
     links.push({ type, href, label, sub });
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { fieldErrors };
   }
 
   await getDb()

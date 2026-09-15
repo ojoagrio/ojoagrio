@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ArtistProfile } from '@/lib/types';
+import { ProductPhotoCarousel } from './ProductPhotoCarousel';
 import '@/styles/tienda.css';
 
 interface Props {
@@ -13,10 +14,44 @@ function whatsappHref(number: string, productName: string, price: number): strin
   return `https://wa.me/${number}?text=${text}`;
 }
 
+/** JSON-LD so search engines and AI answer-assistants can index each product directly. */
+function productJsonLd(artist: Props['artist']) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: artist.products.map((product, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Product',
+        name: product.name,
+        description: product.description || undefined,
+        image: product.photos,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'MXN',
+          price: product.price,
+          availability:
+            product.available > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        },
+      },
+    })),
+  };
+}
+
 /** Minimalist product-catalog page — deliberately distinct from AgrioLinks' comic-book link page. */
 export function TiendaPublicView({ artist, paused = false }: Props) {
+  const showProducts = !paused && artist.products.length > 0;
+
   return (
     <main className="tienda-wrap">
+      {showProducts && (
+        // eslint-disable-next-line react/no-danger -- static JSON-LD we build ourselves, no user HTML
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(artist)) }}
+        />
+      )}
       <header className="tienda-header">
         <Link className="tienda-back" href={`/u/${artist.slug}`}>
           ← {artist.displayName}
@@ -32,14 +67,7 @@ export function TiendaPublicView({ artist, paused = false }: Props) {
         <div className="tienda-grid">
           {artist.products.map((product) => (
             <div className="tienda-card" key={product.id}>
-              <div className="tienda-photo">
-                {product.photos[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- external Blob URL
-                  <img src={product.photos[0]} alt={product.name} />
-                ) : (
-                  <span className="tienda-photo-placeholder">🖼️</span>
-                )}
-              </div>
+              <ProductPhotoCarousel photos={product.photos} alt={product.name} />
               <h2 className="tienda-name">{product.name}</h2>
               <p className="tienda-price">${product.price} MXN</p>
               <p className="tienda-availability">

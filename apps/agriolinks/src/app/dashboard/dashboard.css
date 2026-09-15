@@ -117,7 +117,9 @@
   height: 96px;
   border-radius: 50%;
   overflow: hidden;
-  background: #fdfbf8;
+  background: linear-gradient(90deg, #fdfbf8 25%, #f1e9df 37%, #fdfbf8 63%);
+  background-size: 400% 100%;
+  animation: img-shimmer 1.6s ease infinite;
   border: 1.5px solid #e7ddd0;
   display: flex;
   align-items: center;
@@ -395,6 +397,13 @@
   color: #1a9e63;
 }
 
+.dash-field-error {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #c0264f;
+  margin: 6px 0 0;
+}
+
 /* Inline "preview" mode: swaps the editor for the real public-page markup,
    with its own dark backdrop (the public page's own default background)
    and a bar to get back to editing or share the link. */
@@ -491,7 +500,9 @@
   height: 72px;
   border-radius: 12px;
   overflow: hidden;
-  background: #fdfbf8;
+  background: linear-gradient(90deg, #fdfbf8 25%, #f1e9df 37%, #fdfbf8 63%);
+  background-size: 400% 100%;
+  animation: img-shimmer 1.6s ease infinite;
   border: 1.5px solid #e7ddd0;
 }
 
@@ -560,7 +571,9 @@
   height: 56px;
   border-radius: 14px;
   overflow: hidden;
-  background: #fdfbf8;
+  background: linear-gradient(90deg, #fdfbf8 25%, #f1e9df 37%, #fdfbf8 63%);
+  background-size: 400% 100%;
+  animation: img-shimmer 1.6s ease infinite;
   border: 1.5px solid #e7ddd0;
   display: flex;
   align-items: center;

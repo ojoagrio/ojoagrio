@@ -125,6 +125,7 @@ export function ProfileForm({
             <div className="dash-field">
               <label className="dash-label">Foto de perfil</label>
               <AvatarUpload userId={userId} initialUrl={artist.avatarUrl} onChange={setAvatarUrl} />
+              {state.fieldErrors?.avatarUrl && <p className="dash-field-error">{state.fieldErrors.avatarUrl}</p>}
             </div>
             <div className="dash-field">
               <label className="dash-label" htmlFor="displayName">
@@ -138,6 +139,7 @@ export function ProfileForm({
                 placeholder="Tu nombre artístico"
                 required
               />
+              {state.fieldErrors?.displayName && <p className="dash-field-error">{state.fieldErrors.displayName}</p>}
             </div>
             <div className="dash-field">
               <label className="dash-label" htmlFor="bio">
@@ -199,6 +201,9 @@ export function ProfileForm({
                     defaultValue={linkByType[type]?.sub ?? ''}
                     placeholder="Subtítulo (ej: @usuario)"
                   />
+                  {state.fieldErrors?.[`link_${type}`] && (
+                    <p className="dash-field-error">{state.fieldErrors[`link_${type}`]}</p>
+                  )}
                 </div>
               </div>
             ))}

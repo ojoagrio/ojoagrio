@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import type { Product } from '@/lib/types';
 import { TiendaPublicView } from '@/components/TiendaPublicView';
@@ -43,6 +43,22 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
 
   function updateField<K extends keyof Product>(id: string, field: K, value: Product[K]) {
     setProducts(products.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
+  }
+
+  // After a failed save, jump straight to the first product that has a
+  // problem instead of leaving the user to guess which of up to 6 collapsed
+  // cards is the one that didn't validate.
+  useEffect(() => {
+    if (!state.fieldErrors) return;
+    const firstBadIndex = products.findIndex((_, i) =>
+      Object.keys(state.fieldErrors ?? {}).some((key) => key.startsWith(`product_${i}_`))
+    );
+    if (firstBadIndex >= 0) setEditingId(products[firstBadIndex].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to a new failed submission, not every products/editingId change
+  }, [state.fieldErrors]);
+
+  function productHasError(index: number): boolean {
+    return Object.keys(state.fieldErrors ?? {}).some((key) => key.startsWith(`product_${index}_`));
   }
 
   if (view === 'preview') {
@@ -106,6 +122,7 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                 onChange={(e) => setWhatsappNumber(e.target.value)}
                 placeholder="521XXXXXXXXXX"
               />
+              {state.fieldErrors?.whatsappNumber && <p className="dash-field-error">{state.fieldErrors.whatsappNumber}</p>}
             </div>
           </fieldset>
 
@@ -137,6 +154,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                         initialUrls={product.photos}
                         onChange={(photos) => updateField(product.id, 'photos', photos)}
                       />
+                      {state.fieldErrors?.[`product_${index}_photos`] && (
+                        <p className="dash-field-error">{state.fieldErrors[`product_${index}_photos`]}</p>
+                      )}
                     </div>
 
                     <div className="dash-field">
@@ -147,6 +167,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                         onChange={(e) => updateField(product.id, 'name', e.target.value)}
                         placeholder="Ej: Astro Bunny"
                       />
+                      {state.fieldErrors?.[`product_${index}_name`] && (
+                        <p className="dash-field-error">{state.fieldErrors[`product_${index}_name`]}</p>
+                      )}
                     </div>
 
                     <div className="dash-field">
@@ -158,6 +181,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                         value={product.price || ''}
                         onChange={(e) => updateField(product.id, 'price', Number(e.target.value) || 0)}
                       />
+                      {state.fieldErrors?.[`product_${index}_price`] && (
+                        <p className="dash-field-error">{state.fieldErrors[`product_${index}_price`]}</p>
+                      )}
                     </div>
 
                     <div className="dash-field">
@@ -169,6 +195,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                         value={product.available || ''}
                         onChange={(e) => updateField(product.id, 'available', Number(e.target.value) || 0)}
                       />
+                      {state.fieldErrors?.[`product_${index}_available`] && (
+                        <p className="dash-field-error">{state.fieldErrors[`product_${index}_available`]}</p>
+                      )}
                     </div>
 
                     <div className="dash-field">
@@ -202,7 +231,10 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                       )}
                     </div>
                     <div className="dash-product-info">
-                      <span className="dash-product-name">{product.name || 'Producto sin nombre'}</span>
+                      <span className="dash-product-name">
+                        {productHasError(index) && <span aria-label="Tiene un error">⚠️ </span>}
+                        {product.name || 'Producto sin nombre'}
+                      </span>
                       <span className="dash-product-meta">
                         {product.price > 0 ? `$${product.price} MXN` : 'Sin precio'}
                         {' · '}
@@ -238,6 +270,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
           )}
 
           {state.error && <p className="dash-message error">{state.error}</p>}
+          {state.fieldErrors && (
+            <p className="dash-message error">Revisá los campos marcados con ⚠️ antes de guardar.</p>
+          )}
           {state.saved && <p className="dash-message success">Guardado ✅</p>}
 
           <div className="dash-actions">

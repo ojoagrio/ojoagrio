@@ -14,6 +14,17 @@
   box-sizing: border-box;
 }
 
+/* Shared shimmer keyframes for image-loading placeholders — dashboard.css
+   and tienda.css apply this with their own theme-appropriate colors. */
+@keyframes img-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 html,
 body {
   margin: 0;
