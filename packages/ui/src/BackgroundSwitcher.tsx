@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useBackgroundOverride } from './BackgroundOverrideContext';
 
 const THREE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
 const VANTA_BASE = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/';
@@ -43,7 +44,13 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
   const isLandingPage = pathname === '/';
   const isStorePage = pathname?.endsWith('/tienda') ?? false;
   const allowedModes = isLandingPage ? LANDING_MODES : MODES;
-  const showPicker = !isLandingPage && !isStorePage;
+
+  // A page can drive the background itself instead of the default
+  // localStorage-based picker (the dashboard's own "Fondo animado" chips do
+  // this) — when it does, hide this component's own picker entirely and just
+  // follow whatever mode it sets, live.
+  const { overrideMode } = useBackgroundOverride();
+  const showPicker = !isLandingPage && !isStorePage && !overrideMode;
 
   useEffect(() => {
     try {
@@ -186,11 +193,24 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
       startEffect(mode);
       currentModeRef.current = mode;
       if (select) select.value = mode;
-      try {
-        localStorage.setItem(STORAGE_KEY, mode);
-      } catch {
-        // storage unavailable (private mode, etc.) — non-fatal
+      if (!overrideMode) {
+        try {
+          localStorage.setItem(STORAGE_KEY, mode);
+        } catch {
+          // storage unavailable (private mode, etc.) — non-fatal
+        }
       }
+    }
+
+    if (overrideMode) {
+      // Fully controlled by another page — no picker, no auto-cycle, no
+      // localStorage. Re-runs (via the dependency array below) whenever the
+      // controlling page changes its selection.
+      activate(overrideMode as Mode);
+      return () => {
+        cancelled = true;
+        stopAll();
+      };
     }
 
     function restartAutoCycle() {
@@ -230,7 +250,7 @@ export function BackgroundSwitcher({ brandLabel = '👁️ OJOAGRIO' }: Props) {
       if (autoTimer) clearInterval(autoTimer);
       stopAll();
     };
-  }, [isEmbedded, isLandingPage, isStorePage, allowedModes]);
+  }, [isEmbedded, isLandingPage, isStorePage, allowedModes, overrideMode]);
 
   if (isStorePage) {
     // The tienda pages render their own flat dark background (tienda.css) —

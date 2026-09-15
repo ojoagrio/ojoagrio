@@ -1,6 +1,6 @@
 import '@ojoagrio/ui/src/styles/global.css';
 import type { ReactNode } from 'react';
-import { BackgroundSwitcher } from '@ojoagrio/ui';
+import { BackgroundSwitcher, BackgroundOverrideProvider } from '@ojoagrio/ui';
 
 export const metadata = {
   metadataBase: new URL('https://ojoagrio.com'),
@@ -27,8 +27,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body>
-        <BackgroundSwitcher brandLabel="🔗 AGRIOLINKS" />
-        {children}
+        <BackgroundOverrideProvider>
+          <BackgroundSwitcher brandLabel="🔗 AGRIOLINKS" />
+          {children}
+        </BackgroundOverrideProvider>
       </body>
     </html>
   );

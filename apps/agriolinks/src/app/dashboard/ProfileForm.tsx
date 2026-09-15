@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
-import { SocialIcon, type SocialType } from '@ojoagrio/ui';
+import { SocialIcon, type SocialType, useBackgroundOverride } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
 import { ShareButton } from './ShareButton';
@@ -48,6 +48,16 @@ export function ProfileForm({
   const [avatarUrl, setAvatarUrl] = useState(artist.avatarUrl);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
   const [showComingSoon, setShowComingSoon] = useState(false);
+
+  // Drive the shared animated background from this page's own "Fondo
+  // animado" picker instead of BackgroundSwitcher's independent
+  // localStorage-based one — no separate floating picker, no auto-cycle,
+  // just whatever's selected here, live.
+  const { setOverrideMode } = useBackgroundOverride();
+  useEffect(() => {
+    setOverrideMode(backgroundEffect);
+  }, [backgroundEffect, setOverrideMode]);
+  useEffect(() => () => setOverrideMode(null), [setOverrideMode]);
 
   const expired = isTrialExpired(artist.trialEndsAt);
   const remaining = daysLeft(artist.trialEndsAt);
