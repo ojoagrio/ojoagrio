@@ -1,5 +1,13 @@
 import Link from 'next/link';
+import { isNotNull, count } from 'drizzle-orm';
+import { getDb } from '@/db';
+import { artists } from '@/db/schema';
 import './landing.css';
+
+// Without this, Next prerenders the landing once at build time and the real
+// artist count below would freeze at whatever it was then. Revalidate
+// hourly — plenty fresh for a slow-moving counter, still cheap to serve.
+export const revalidate = 3600;
 
 const FREE_MONTH_CODE = 'AGRIOFREE';
 const SIGNUP_WITH_CODE = `/signup?code=${FREE_MONTH_CODE}`;
@@ -71,7 +79,19 @@ const FAQS = [
   },
 ];
 
-export default function LandingPage() {
+/** Real signup count (excludes the hand-seeded demo artist, which has no tracked trial) — never fabricated, so it's simply not shown until it's worth showing. */
+async function getRealArtistCount(): Promise<number> {
+  try {
+    const [row] = await getDb().select({ n: count() }).from(artists).where(isNotNull(artists.trialEndsAt));
+    return row?.n ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export default async function LandingPage() {
+  const artistCount = await getRealArtistCount();
+
   return (
     <div className="landing">
       <section className="landing-hero">
@@ -81,6 +101,11 @@ export default function LandingPage() {
           Todo tu Instagram, TikTok, Spotify y YouTube en un solo link — con fondos animados que
           ningún Linktree tiene. Hecho para raperos, productores y artistas independientes.
         </p>
+        {artistCount > 0 && (
+          <p className="landing-social-proof">
+            🎉 Ya se sumaron {artistCount} artista{artistCount === 1 ? '' : 's'} independiente{artistCount === 1 ? '' : 's'}
+          </p>
+        )}
         <div className="landing-cta-row">
           <Link className="landing-btn-primary" href={SIGNUP_WITH_CODE}>
             🎁 Quiero mi mes gratis

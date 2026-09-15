@@ -1,11 +1,21 @@
 import '@ojoagrio/ui/src/styles/global.css';
 import type { ReactNode } from 'react';
+import type { Viewport } from 'next';
 import { BackgroundSwitcher, BackgroundOverrideProvider } from '@ojoagrio/ui';
+
+export const viewport: Viewport = {
+  themeColor: '#e4007c',
+};
 
 export const metadata = {
   metadataBase: new URL('https://ojoagrio.com'),
   title: 'AgrioLinks',
   description: 'Tu página de links, con fondos animados, en minutos.',
+  manifest: '/agriolinks/manifest.json',
+  icons: {
+    icon: '/agriolinks/icon.svg',
+    apple: '/agriolinks/icon.svg',
+  },
   openGraph: {
     title: 'AgrioLinks — Tu página de links, con fondos que se mueven',
     description:

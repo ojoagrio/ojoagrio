@@ -117,6 +117,21 @@
   opacity: 0.95;
 }
 
+.landing-social-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(46, 196, 182, 0.16);
+  border: 2px solid var(--turquoise);
+  color: var(--cream);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  margin: 0 auto 22px;
+  width: fit-content;
+}
+
 /* Section headings, shared */
 .landing-kicker {
   display: block;

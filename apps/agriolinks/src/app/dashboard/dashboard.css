@@ -441,10 +441,6 @@
 
 /* Admin invite-code list */
 .dash-code-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
   padding: 12px 0;
   border-bottom: 1px solid #eee2d3;
 }
@@ -453,16 +449,38 @@
   border-bottom: none;
 }
 
+.dash-code-row-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
 .dash-code-name {
   font-weight: 800;
   font-family: monospace;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .dash-code-meta {
   font-size: 0.8rem;
   color: var(--ink-soft);
   text-align: right;
+}
+
+.dash-code-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: #f1e9df;
+  overflow: hidden;
+}
+
+.dash-code-bar-fill {
+  height: 100%;
+  background: var(--rosa);
+  border-radius: 999px;
 }
 
 .dash-message.error {
