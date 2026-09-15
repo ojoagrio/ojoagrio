@@ -203,6 +203,10 @@
   color: #2ec4b6;
 }
 
+.tienda-dash .dash-stats-row {
+  color: #9a9ab0;
+}
+
 .tienda-dash .dash-card {
   background: #16161f;
   border-color: #26263a;
@@ -293,4 +297,12 @@
 
 .tienda-dash .dash-field-error {
   color: #ff5fb3;
+}
+
+.tienda-dash .dash-autosave-status {
+  color: #9a9ab0;
+}
+
+.tienda-dash .dash-autosave-status.saved {
+  color: #6fe0d3;
 }

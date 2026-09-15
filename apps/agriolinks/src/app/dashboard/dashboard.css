@@ -30,6 +30,19 @@
   margin: 0;
 }
 
+.dash-autosave-status {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
+.dash-autosave-status.saved {
+  color: #1a9e63;
+}
+
 .dash-topbar-actions {
   display: flex;
   align-items: center;
@@ -63,8 +76,71 @@
 .dash-url {
   font-size: 0.85rem;
   color: var(--ink-soft);
-  margin: 0 0 24px;
+  margin: 0 0 8px;
   word-break: break-all;
+}
+
+.dash-stats-row {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+}
+
+/* Onboarding checklist */
+.dash-onboarding {
+  background: rgba(46, 196, 182, 0.1);
+  border: 1.5px solid rgba(46, 196, 182, 0.3);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.dash-onboarding-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #1a7d73;
+}
+
+.dash-onboarding-dismiss {
+  background: none;
+  border: none;
+  color: #1a7d73;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.dash-onboarding-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-onboarding-list li {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-onboarding-list li.done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.dash-onboarding-check {
+  flex-shrink: 0;
 }
 
 .dash-url strong {

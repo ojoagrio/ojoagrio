@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import { SocialIcon, type SocialType, useBackgroundOverride } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
@@ -9,6 +9,7 @@ import { saveProfile, logout, type SaveProfileState } from './actions';
 import { ShareButton } from './ShareButton';
 import { AvatarUpload } from './AvatarUpload';
 import { ComingSoonModal } from './ComingSoonModal';
+import { OnboardingChecklist } from './OnboardingChecklist';
 import './dashboard.css';
 
 const SOCIAL_TYPES: { type: SocialType; label: string }[] = [
@@ -49,6 +50,21 @@ export function ProfileForm({
   const [view, setView] = useState<'edit' | 'preview'>('edit');
   const [showComingSoon, setShowComingSoon] = useState(false);
 
+  // Autosave: any change inside the form (typing, background pick, avatar
+  // upload) schedules the same saveProfile action a moment after the user
+  // stops — the explicit "Guardar cambios" button stays as a backup.
+  const formRef = useRef<HTMLFormElement>(null);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function scheduleAutosave() {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      if (formRef.current) formAction(new FormData(formRef.current));
+    }, 1500);
+  }
+  useEffect(() => () => {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+  }, []);
+
   // Drive the shared animated background from this page's own "Fondo
   // animado" picker instead of BackgroundSwitcher's independent
   // localStorage-based one — no separate floating picker, no auto-cycle,
@@ -83,7 +99,14 @@ export function ProfileForm({
     <div className="dash-page">
       <div className="dash-container">
         <div className="dash-topbar">
-          <h1 className="dash-title">Tu página</h1>
+          <h1 className="dash-title">
+            Tu página{' '}
+            {pending ? (
+              <span className="dash-autosave-status">Guardando…</span>
+            ) : state.saved ? (
+              <span className="dash-autosave-status saved">Guardado ✓</span>
+            ) : null}
+          </h1>
           <div className="dash-topbar-actions">
             <button type="button" className="dash-preview-link" onClick={() => setView('preview')}>
               👁️ Ver mi página
@@ -102,6 +125,15 @@ export function ProfileForm({
         <p className="dash-url">
           ojoagrio.com<strong>{publicPath}</strong>
         </p>
+        <p className="dash-stats-row">
+          👁️ {artist.viewCount} visita{artist.viewCount === 1 ? '' : 's'}
+          {' · '}
+          🔗 {artist.links.length} link{artist.links.length === 1 ? '' : 's'} activo{artist.links.length === 1 ? '' : 's'}
+          {' · '}
+          🛍️ {artist.products.length} producto{artist.products.length === 1 ? '' : 's'}
+        </p>
+
+        <OnboardingChecklist artist={artist} />
 
         {remaining !== null && (
           <div className={`dash-trial-banner ${expired ? 'expired' : 'active'}`}>
@@ -118,13 +150,20 @@ export function ProfileForm({
           </div>
         )}
 
-        <form action={formAction}>
+        <form action={formAction} ref={formRef} onChange={scheduleAutosave}>
           <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Perfil</h2>
             <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
             <div className="dash-field">
               <label className="dash-label">Foto de perfil</label>
-              <AvatarUpload userId={userId} initialUrl={artist.avatarUrl} onChange={setAvatarUrl} />
+              <AvatarUpload
+                userId={userId}
+                initialUrl={artist.avatarUrl}
+                onChange={(url) => {
+                  setAvatarUrl(url);
+                  scheduleAutosave();
+                }}
+              />
               {state.fieldErrors?.avatarUrl && <p className="dash-field-error">{state.fieldErrors.avatarUrl}</p>}
             </div>
             <div className="dash-field">
@@ -166,7 +205,10 @@ export function ProfileForm({
                   type="button"
                   className="dash-bg-option"
                   data-selected={backgroundEffect === opt.value}
-                  onClick={() => setBackgroundEffect(opt.value)}
+                  onClick={() => {
+                    setBackgroundEffect(opt.value);
+                    scheduleAutosave();
+                  }}
                 >
                   {opt.label}
                 </button>
@@ -210,7 +252,6 @@ export function ProfileForm({
           </fieldset>
 
           {state.error && <p className="dash-message error">{state.error}</p>}
-          {state.saved && <p className="dash-message success">Guardado ✅</p>}
 
           <div className="dash-actions">
             {expired ? (

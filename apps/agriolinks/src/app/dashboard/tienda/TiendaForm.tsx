@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
 import type { Product } from '@/lib/types';
 import { TiendaPublicView } from '@/components/TiendaPublicView';
@@ -29,6 +29,22 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
   const publicPath = `/agriolinks/u/${artist.slug}/tienda`;
   const atLimit = products.length >= artist.maxProducts;
 
+  // Autosave, but only at deliberate "I'm done with this" moments (closing a
+  // product's edit view, removing one, changing the WhatsApp number) — never
+  // while actively typing into a still-incomplete product, which would
+  // otherwise flash a "necesita un nombre" error before the user gets there.
+  const formRef = useRef<HTMLFormElement>(null);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function scheduleAutosave() {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      if (formRef.current) formAction(new FormData(formRef.current));
+    }, 1500);
+  }
+  useEffect(() => () => {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+  }, []);
+
   function addProduct() {
     if (atLimit) return;
     const product = emptyProduct();
@@ -39,6 +55,7 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
   function removeProduct(id: string) {
     setProducts(products.filter((p) => p.id !== id));
     if (editingId === id) setEditingId(null);
+    scheduleAutosave();
   }
 
   function updateField<K extends keyof Product>(id: string, field: K, value: Product[K]) {
@@ -79,7 +96,14 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
     <div className="dash-page tienda-dash">
       <div className="dash-container">
         <div className="dash-topbar">
-          <h1 className="dash-title">Tu tienda</h1>
+          <h1 className="dash-title">
+            Tu tienda{' '}
+            {pending ? (
+              <span className="dash-autosave-status">Guardando…</span>
+            ) : state.saved ? (
+              <span className="dash-autosave-status saved">Guardado ✓</span>
+            ) : null}
+          </h1>
           <div className="dash-topbar-actions">
             <button type="button" className="dash-preview-link" onClick={() => setView('preview')}>
               👁️ Ver mi tienda
@@ -89,6 +113,11 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
         </div>
         <p className="dash-url">
           ojoagrio.com<strong>{publicPath}</strong>
+        </p>
+        <p className="dash-stats-row">
+          👁️ {artist.viewCount} visita{artist.viewCount === 1 ? '' : 's'}
+          {' · '}
+          💬 {artist.buyClickCount} click{artist.buyClickCount === 1 ? '' : 's'} en Comprar
         </p>
 
         {expired && (
@@ -105,7 +134,7 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
           </div>
         )}
 
-        <form action={formAction}>
+        <form action={formAction} ref={formRef}>
           <input type="hidden" name="productCount" value={products.length} readOnly />
 
           <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
@@ -119,7 +148,10 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                 className="dash-input"
                 name="whatsappNumber"
                 value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
+                onChange={(e) => {
+                  setWhatsappNumber(e.target.value);
+                  scheduleAutosave();
+                }}
                 placeholder="521XXXXXXXXXX"
               />
               {state.fieldErrors?.whatsappNumber && <p className="dash-field-error">{state.fieldErrors.whatsappNumber}</p>}
@@ -212,7 +244,14 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
                     </div>
 
                     <div className="dash-actions">
-                      <button type="button" className="dash-btn-primary" onClick={() => setEditingId(null)}>
+                      <button
+                        type="button"
+                        className="dash-btn-primary"
+                        onClick={() => {
+                          setEditingId(null);
+                          scheduleAutosave();
+                        }}
+                      >
                         Listo
                       </button>
                       <button type="button" className="dash-btn-secondary" onClick={() => removeProduct(product.id)}>
@@ -273,7 +312,6 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
           {state.fieldErrors && (
             <p className="dash-message error">Revisá los campos marcados con ⚠️ antes de guardar.</p>
           )}
-          {state.saved && <p className="dash-message success">Guardado ✅</p>}
 
           <div className="dash-actions">
             {expired ? (

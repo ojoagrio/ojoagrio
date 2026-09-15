@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ArtistProfile } from '@/lib/types';
 import { ProductPhotoCarousel } from './ProductPhotoCarousel';
+import { BuyButton } from './BuyButton';
 import '@/styles/tienda.css';
 
 interface Props {
@@ -75,14 +76,7 @@ export function TiendaPublicView({ artist, paused = false }: Props) {
               </p>
               {product.description && <p className="tienda-description">{product.description}</p>}
               {artist.whatsappNumber && product.available > 0 && (
-                <a
-                  className="tienda-buy"
-                  href={whatsappHref(artist.whatsappNumber, product.name, product.price)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Comprar por WhatsApp
-                </a>
+                <BuyButton href={whatsappHref(artist.whatsappNumber, product.name, product.price)} slug={artist.slug} />
               )}
             </div>
           ))}

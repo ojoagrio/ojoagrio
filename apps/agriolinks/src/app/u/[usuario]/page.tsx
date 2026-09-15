@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getArtistBySlug, isTrialExpired } from '@/lib/artists';
+import { getArtistBySlug, isTrialExpired, incrementViewCount } from '@/lib/artists';
 import { RevealOnMount } from '@/components/RevealOnMount';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 
@@ -12,6 +12,7 @@ export default async function ArtistPage({ params }: Props) {
   const artist = await getArtistBySlug(usuario);
 
   if (!artist) notFound();
+  await incrementViewCount(usuario);
 
   return (
     <RevealOnMount>

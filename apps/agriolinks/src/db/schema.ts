@@ -50,6 +50,11 @@ export const artists = pgTable('artists', {
   // Null means "no trial tracked" (e.g. the hand-seeded demo artist). Real
   // signups always get one from the invite code they redeemed.
   trialEndsAt: timestamp('trial_ends_at', { withTimezone: true }),
+  // Own, lightweight analytics — no third-party service. Total (not
+  // time-windowed) counts, incremented atomically on each real page view /
+  // WhatsApp buy-click, shown back to the artist in their dashboard.
+  viewCount: integer('view_count').notNull().default(0),
+  buyClickCount: integer('buy_click_count').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
