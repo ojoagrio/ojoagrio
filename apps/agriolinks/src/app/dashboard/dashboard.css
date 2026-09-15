@@ -483,6 +483,86 @@
   border-radius: 999px;
 }
 
+/* Admin nav (Códigos / Usuarios) */
+.dash-admin-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.dash-admin-nav-item {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid #e7ddd0;
+  text-decoration: none;
+  cursor: default;
+}
+
+a.dash-admin-nav-item:hover {
+  background: #f1e9df;
+  cursor: pointer;
+}
+
+.dash-admin-nav-item.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* Admin: user management */
+.admin-user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-user-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-user-name {
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.admin-user-name:hover {
+  text-decoration: underline;
+}
+
+.admin-user-slug {
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-family: monospace;
+}
+
+.admin-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-user-redeem-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-user-redeem-form .dash-input {
+  width: 160px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
 .dash-message.error {
   color: #c0264f;
 }
@@ -503,7 +583,10 @@
    and a bar to get back to editing or share the link. */
 .dash-preview-shell {
   min-height: 100vh;
-  background: var(--ink);
+  /* No opaque background here — the real animated background (rendered once
+     in the root layout, fixed behind everything) needs to show through, the
+     same way it does on the actual public page. bg-layer's own fallback
+     color already matches --ink before Vanta paints. */
 }
 
 .dash-preview-bar {

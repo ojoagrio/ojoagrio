@@ -18,6 +18,7 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     whatsappNumber: row.whatsappNumber,
     maxProducts: row.maxProducts,
     trialEndsAt: row.trialEndsAt,
+    isBlocked: row.isBlocked,
   };
 }
 
@@ -43,6 +44,7 @@ export async function getArtistByUserId(userId: string): Promise<OwnArtistProfil
     maxProducts: row.maxProducts,
     backgroundEffect: row.backgroundEffect,
     trialEndsAt: row.trialEndsAt,
+    isBlocked: row.isBlocked,
     viewCount: row.viewCount,
     buyClickCount: row.buyClickCount,
   };
@@ -51,6 +53,11 @@ export async function getArtistByUserId(userId: string): Promise<OwnArtistProfil
 /** True once trialEndsAt has passed. An artist with no tracked trial (null) never expires. */
 export function isTrialExpired(trialEndsAt: Date | null): boolean {
   return trialEndsAt !== null && trialEndsAt.getTime() < Date.now();
+}
+
+/** Combines the trial and the admin block switch — either one puts the account in the same read-only/paused state. */
+export function isSuspended(artist: { trialEndsAt: Date | null; isBlocked: boolean }): boolean {
+  return isTrialExpired(artist.trialEndsAt) || artist.isBlocked;
 }
 
 /** Own, no-third-party page-view counter — best-effort: a failure here should never break the page render. */

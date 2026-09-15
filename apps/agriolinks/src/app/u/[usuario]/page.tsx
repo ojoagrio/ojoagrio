@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getArtistBySlug, isTrialExpired, incrementViewCount } from '@/lib/artists';
+import { getArtistBySlug, isSuspended, incrementViewCount } from '@/lib/artists';
 import { RevealOnMount } from '@/components/RevealOnMount';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 
@@ -14,7 +14,7 @@ export default async function ArtistPage({ params }: Props) {
   if (!artist) notFound();
   await incrementViewCount(usuario);
 
-  const paused = isTrialExpired(artist.trialEndsAt);
+  const paused = isSuspended(artist);
   // Same reasoning as the tienda page: don't ship bio/links to the client at
   // all once paused, or they'd still ride along in React's hydration
   // payload even though nothing renders them.

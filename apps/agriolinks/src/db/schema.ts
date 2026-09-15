@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, jsonb, integer, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -55,6 +55,10 @@ export const artists = pgTable('artists', {
   // WhatsApp buy-click, shown back to the artist in their dashboard.
   viewCount: integer('view_count').notNull().default(0),
   buyClickCount: integer('buy_click_count').notNull().default(0),
+  // Admin-only kill switch — behaves exactly like an expired trial (read-only
+  // dashboard, paused public page) rather than denying login outright, so an
+  // affected artist can still see why.
+  isBlocked: boolean('is_blocked').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

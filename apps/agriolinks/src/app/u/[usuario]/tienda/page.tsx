@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getArtistBySlug, isTrialExpired, incrementViewCount } from '@/lib/artists';
+import { getArtistBySlug, isSuspended, incrementViewCount } from '@/lib/artists';
 import { TiendaPublicView } from '@/components/TiendaPublicView';
 
 interface Props {
@@ -13,7 +13,7 @@ export default async function TiendaPage({ params }: Props) {
   if (!artist) notFound();
   await incrementViewCount(usuario);
 
-  const paused = isTrialExpired(artist.trialEndsAt);
+  const paused = isSuspended(artist);
   // Don't hand the catalog to the client at all once paused — the visible
   // markup already hides it, but React's hydration payload otherwise still
   // ships the full product list (names, prices) inside a <script> tag,

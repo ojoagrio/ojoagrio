@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useEffect, useRef, useState } from 'react';
-import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
+import { isSuspended, type OwnArtistProfile } from '@/lib/artists';
 import type { Product } from '@/lib/types';
 import { TiendaPublicView } from '@/components/TiendaPublicView';
 import { ShareButton } from '../ShareButton';
@@ -25,7 +26,7 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
 
-  const expired = isTrialExpired(artist.trialEndsAt);
+  const expired = isSuspended(artist);
   const publicPath = `/agriolinks/u/${artist.slug}/tienda`;
   const atLimit = products.length >= artist.maxProducts;
 
@@ -105,6 +106,9 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
             ) : null}
           </h1>
           <div className="dash-topbar-actions">
+            <Link className="dash-btn-secondary" href="/dashboard">
+              ← AgrioLinks
+            </Link>
             <button type="button" className="dash-preview-link" onClick={() => setView('preview')}>
               👁️ Ver mi tienda
             </button>
@@ -122,15 +126,21 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
 
         {expired && (
           <div className="dash-trial-banner expired">
-            <span>⏸️ Tu mes gratis terminó — tu tienda quedó pausada hasta que renueves.</span>
-            <button
-              type="button"
-              className="dash-btn-primary"
-              style={{ flex: '0 0 auto' }}
-              onClick={() => setShowComingSoon(true)}
-            >
-              Comprar plan
-            </button>
+            <span>
+              {artist.isBlocked
+                ? '🚫 Tu cuenta fue bloqueada. Contactá a quien administra AgrioLinks para reactivarla.'
+                : '⏸️ Tu mes gratis terminó — tu tienda quedó pausada hasta que renueves.'}
+            </span>
+            {!artist.isBlocked && (
+              <button
+                type="button"
+                className="dash-btn-primary"
+                style={{ flex: '0 0 auto' }}
+                onClick={() => setShowComingSoon(true)}
+              >
+                Comprar plan
+              </button>
+            )}
           </div>
         )}
 
@@ -314,7 +324,11 @@ export function TiendaForm({ artist, userId }: { artist: OwnArtistProfile; userI
           )}
 
           <div className="dash-actions">
-            {expired ? (
+            {artist.isBlocked ? (
+              <button className="dash-btn-primary" type="button" disabled>
+                Cuenta bloqueada
+              </button>
+            ) : expired ? (
               <button className="dash-btn-primary" type="button" onClick={() => setShowComingSoon(true)}>
                 Comprar plan
               </button>

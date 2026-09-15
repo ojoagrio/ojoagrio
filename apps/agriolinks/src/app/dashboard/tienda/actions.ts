@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getDb } from '@/db';
 import { artists } from '@/db/schema';
 import { auth } from '@/auth';
-import { isTrialExpired } from '@/lib/artists';
+import { isSuspended } from '@/lib/artists';
 import type { Product } from '@/lib/types';
 
 export interface SaveTiendaState {
@@ -31,15 +31,15 @@ export async function saveTienda(_prevState: SaveTiendaState, formData: FormData
   }
 
   const [current] = await getDb()
-    .select({ trialEndsAt: artists.trialEndsAt, maxProducts: artists.maxProducts })
+    .select({ trialEndsAt: artists.trialEndsAt, maxProducts: artists.maxProducts, isBlocked: artists.isBlocked })
     .from(artists)
     .where(eq(artists.userId, session.user.id))
     .limit(1);
   if (!current) {
     return { error: 'No encontramos tu perfil.' };
   }
-  if (isTrialExpired(current.trialEndsAt)) {
-    return { error: 'Tu mes gratis terminó — renová tu plan para seguir editando.' };
+  if (isSuspended(current)) {
+    return { error: 'Tu cuenta no puede editarse ahora — renová tu plan o contactá soporte.' };
   }
 
   const fieldErrors: Record<string, string> = {};

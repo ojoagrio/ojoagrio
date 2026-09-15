@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState, useEffect, useRef, useState } from 'react';
-import { isTrialExpired, type OwnArtistProfile } from '@/lib/artists';
+import { isTrialExpired, isSuspended, type OwnArtistProfile } from '@/lib/artists';
 import { SocialIcon, type SocialType, useBackgroundOverride } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
@@ -75,7 +75,8 @@ export function ProfileForm({
   }, [backgroundEffect, setOverrideMode]);
   useEffect(() => () => setOverrideMode(null), [setOverrideMode]);
 
-  const expired = isTrialExpired(artist.trialEndsAt);
+  const trialExpired = isTrialExpired(artist.trialEndsAt);
+  const suspended = isSuspended(artist);
   const remaining = daysLeft(artist.trialEndsAt);
 
   const linkByType = Object.fromEntries(artist.links.map((l) => [l.type, l]));
@@ -90,7 +91,7 @@ export function ProfileForm({
           </button>
           <ShareButton path={publicPath} title={artist.displayName} />
         </div>
-        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} paused={expired} />
+        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} paused={suspended} />
       </div>
     );
   }
@@ -135,14 +136,16 @@ export function ProfileForm({
 
         <OnboardingChecklist artist={artist} />
 
-        {remaining !== null && (
-          <div className={`dash-trial-banner ${expired ? 'expired' : 'active'}`}>
+        {(remaining !== null || artist.isBlocked) && (
+          <div className={`dash-trial-banner ${suspended ? 'expired' : 'active'}`}>
             <span>
-              {expired
-                ? '⏸️ Tu mes gratis terminó — tu página pública quedó limitada hasta que renueves.'
-                : `🎁 Te quedan ${remaining} día${remaining === 1 ? '' : 's'} de tu mes gratis.`}
+              {artist.isBlocked
+                ? '🚫 Tu cuenta fue bloqueada. Contactá a quien administra AgrioLinks para reactivarla.'
+                : trialExpired
+                  ? '⏸️ Tu mes gratis terminó — tu página pública quedó limitada hasta que renueves.'
+                  : `🎁 Te quedan ${remaining} día${remaining === 1 ? '' : 's'} de tu mes gratis.`}
             </span>
-            {expired && (
+            {trialExpired && !artist.isBlocked && (
               <button type="button" className="dash-btn-primary" style={{ flex: '0 0 auto' }} onClick={() => setShowComingSoon(true)}>
                 Comprar plan
               </button>
@@ -151,7 +154,7 @@ export function ProfileForm({
         )}
 
         <form action={formAction} ref={formRef} onChange={scheduleAutosave}>
-          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
+          <fieldset disabled={suspended} className={`dash-card${suspended ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Perfil</h2>
             <input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
             <div className="dash-field">
@@ -195,7 +198,7 @@ export function ProfileForm({
             </div>
           </fieldset>
 
-          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
+          <fieldset disabled={suspended} className={`dash-card${suspended ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Fondo animado</h2>
             <input type="hidden" name="backgroundEffect" value={backgroundEffect} />
             <div className="dash-bg-grid">
@@ -216,7 +219,7 @@ export function ProfileForm({
             </div>
           </fieldset>
 
-          <fieldset disabled={expired} className={`dash-card${expired ? ' dash-card-disabled' : ''}`}>
+          <fieldset disabled={suspended} className={`dash-card${suspended ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Tus links</h2>
             {SOCIAL_TYPES.map(({ type, label }) => (
               <div key={type} className="dash-link-card">
@@ -254,7 +257,11 @@ export function ProfileForm({
           {state.error && <p className="dash-message error">{state.error}</p>}
 
           <div className="dash-actions">
-            {expired ? (
+            {artist.isBlocked ? (
+              <button className="dash-btn-primary" type="button" disabled>
+                Cuenta bloqueada
+              </button>
+            ) : trialExpired ? (
               <button className="dash-btn-primary" type="button" onClick={() => setShowComingSoon(true)}>
                 Comprar plan
               </button>

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { getDb } from '@/db';
 import { artists } from '@/db/schema';
 import { auth, signOut } from '@/auth';
-import { isTrialExpired } from '@/lib/artists';
+import { isSuspended } from '@/lib/artists';
 import type { ArtistLink } from '@/lib/types';
 import type { SocialType } from '@ojoagrio/ui';
 
@@ -44,12 +44,12 @@ export async function saveProfile(_prevState: SaveProfileState, formData: FormDa
   }
 
   const [current] = await getDb()
-    .select({ trialEndsAt: artists.trialEndsAt })
+    .select({ trialEndsAt: artists.trialEndsAt, isBlocked: artists.isBlocked })
     .from(artists)
     .where(eq(artists.userId, session.user.id))
     .limit(1);
-  if (current && isTrialExpired(current.trialEndsAt)) {
-    return { error: 'Tu mes gratis terminó — renová tu plan para seguir editando.' };
+  if (current && isSuspended(current)) {
+    return { error: 'Tu cuenta no puede editarse ahora — renová tu plan o contactá soporte.' };
   }
 
   const displayName = String(formData.get('displayName') ?? '').trim();

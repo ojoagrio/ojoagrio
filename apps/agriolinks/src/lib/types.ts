@@ -27,4 +27,5 @@ export interface ArtistProfile {
   maxProducts: number;
   /** Null means no trial is tracked for this artist (e.g. the seeded demo). */
   trialEndsAt: Date | null;
+  isBlocked: boolean;
 }

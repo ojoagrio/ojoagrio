@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -23,6 +24,12 @@ export default async function AdminPage() {
       <div className="dash-container">
         <div className="dash-topbar">
           <h1 className="dash-title">Códigos de invitación</h1>
+        </div>
+        <div className="dash-admin-nav">
+          <span className="dash-admin-nav-item active">Códigos</span>
+          <Link className="dash-admin-nav-item" href="/admin/usuarios">
+            Usuarios
+          </Link>
         </div>
 
         <AdminCodesForm />
