@@ -14,9 +14,13 @@ export default async function ArtistPage({ params }: Props) {
   if (!artist) notFound();
   await incrementViewCount(usuario);
 
+  const paused = isTrialExpired(artist.trialEndsAt);
+  // Same reasoning as the tienda page: don't ship bio/links to the client at
+  // all once paused, or they'd still ride along in React's hydration
+  // payload even though nothing renders them.
   return (
     <RevealOnMount>
-      <ArtistPublicView artist={artist} paused={isTrialExpired(artist.trialEndsAt)} />
+      <ArtistPublicView artist={paused ? { ...artist, bio: '', links: [], products: [] } : artist} paused={paused} />
     </RevealOnMount>
   );
 }
