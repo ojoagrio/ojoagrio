@@ -117,7 +117,7 @@ export function ProfileForm({
               🛍️ Tienda
             </Link>
             {isAdmin && (
-              <Link className="dash-btn-secondary" href="/admin">
+              <Link className="dash-btn-secondary" href="/admin/analytics">
                 🔑 Admin
               </Link>
             )}

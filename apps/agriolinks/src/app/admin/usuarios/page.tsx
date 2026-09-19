@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -6,6 +5,7 @@ import { getDb } from '@/db';
 import { artists } from '@/db/schema';
 import { isAdminEmail } from '@/lib/admin';
 import { isSuspended, isTrialExpired } from '@/lib/artists';
+import { AdminNav } from '../AdminNav';
 import { toggleBlocked, redeemCodeForArtist } from './actions';
 import '../../dashboard/dashboard.css';
 
@@ -27,12 +27,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
         <div className="dash-topbar">
           <h1 className="dash-title">Usuarios</h1>
         </div>
-        <div className="dash-admin-nav">
-          <Link className="dash-admin-nav-item" href="/admin">
-            Códigos
-          </Link>
-          <span className="dash-admin-nav-item active">Usuarios</span>
-        </div>
+        <AdminNav active="usuarios" />
 
         {error && <p className="dash-message error">{error}</p>}
         {ok && <p className="dash-message success">Cupón aplicado ✅</p>}

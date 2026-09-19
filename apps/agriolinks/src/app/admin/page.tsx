@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { desc } from 'drizzle-orm';
 import { auth } from '@/auth';
@@ -6,6 +5,7 @@ import { getDb } from '@/db';
 import { inviteCodes } from '@/db/schema';
 import { isAdminEmail } from '@/lib/admin';
 import { AdminCodesForm } from './AdminCodesForm';
+import { AdminNav } from './AdminNav';
 import '../dashboard/dashboard.css';
 
 export default async function AdminPage() {
@@ -25,12 +25,7 @@ export default async function AdminPage() {
         <div className="dash-topbar">
           <h1 className="dash-title">Códigos de invitación</h1>
         </div>
-        <div className="dash-admin-nav">
-          <span className="dash-admin-nav-item active">Códigos</span>
-          <Link className="dash-admin-nav-item" href="/admin/usuarios">
-            Usuarios
-          </Link>
-        </div>
+        <AdminNav active="codigos" />
 
         <AdminCodesForm />
 
