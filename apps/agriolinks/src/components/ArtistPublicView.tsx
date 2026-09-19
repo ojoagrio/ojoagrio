@@ -42,8 +42,8 @@ export function ArtistPublicView({ artist, reveal = true, paused = false }: Prop
         <>
           <p className={`bio${revealClass}`}>{artist.bio}</p>
           <div className="links">
-            {artist.links.map((link) => (
-              <SocialButton key={link.href} {...link} reveal={reveal} />
+            {artist.links.map((link, i) => (
+              <SocialButton key={link.id ?? `${link.type}-${link.href}-${i}`} {...link} reveal={reveal} />
             ))}
             {artist.products.length > 0 && (
               <Link className={`link-btn${revealClass}`} href={`/u/${artist.slug}/tienda`}>

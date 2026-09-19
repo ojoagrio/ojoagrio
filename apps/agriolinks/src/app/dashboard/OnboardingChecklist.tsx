@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { OwnArtistProfile } from '@/lib/artists';
+import { activeLinks } from '@/lib/links';
 
 interface Item {
   label: string;
@@ -12,7 +13,7 @@ function buildItems(artist: OwnArtistProfile): Item[] {
   return [
     { label: 'Subí tu foto de perfil', done: !!artist.avatarUrl },
     { label: 'Contá algo en tu bio', done: artist.bio.trim().length > 0 },
-    { label: 'Cargá al menos un link', done: artist.links.length > 0 },
+    { label: 'Cargá al menos un link', done: activeLinks(artist.links).length > 0 },
   ];
 }
 

@@ -8,7 +8,8 @@
     "preview": "next start",
     "db:push": "dotenv -e .env.local -- drizzle-kit push",
     "db:seed": "dotenv -e .env.local -- tsx scripts/seed.ts",
-    "db:cleanup": "dotenv -e .env.local -- tsx scripts/cleanup-db.ts"
+    "db:cleanup": "dotenv -e .env.local -- tsx scripts/cleanup-db.ts",
+    "db:reset": "dotenv -e .env.local -- tsx scripts/reset-test-data.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

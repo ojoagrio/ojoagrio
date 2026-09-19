@@ -2,6 +2,7 @@ import { eq, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { artists, dailyStats } from '@/db/schema';
 import type { ArtistProfile, ArtistLink, Product } from './types';
+import { activeLinks } from './links';
 
 export async function getArtistBySlug(slug: string): Promise<ArtistProfile | null> {
   const rows = await getDb().select().from(artists).where(eq(artists.slug, slug)).limit(1);
@@ -13,7 +14,8 @@ export async function getArtistBySlug(slug: string): Promise<ArtistProfile | nul
     displayName: row.displayName,
     bio: row.bio,
     avatarUrl: row.avatarUrl,
-    links: row.links as ArtistLink[],
+    // Public consumers only ever see links the artist actually filled in.
+    links: activeLinks(row.links as ArtistLink[]),
     products: row.products as Product[],
     whatsappNumber: row.whatsappNumber,
     maxProducts: row.maxProducts,

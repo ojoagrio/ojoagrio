@@ -13,8 +13,8 @@ async function main() {
       displayName: 'Artista Demo',
       bio: 'Esta es una página de ejemplo de AgrioLinks — así se va a ver la tuya.',
       links: [
-        { type: 'instagram', href: 'https://instagram.com', label: 'Instagram', sub: '@artista.demo' },
-        { type: 'spotify', href: 'https://open.spotify.com', label: 'Spotify', sub: 'Escuchá mi música' },
+        { id: 'demo-ig', type: 'instagram', href: 'https://instagram.com', label: 'Instagram', sub: '@artista.demo' },
+        { id: 'demo-sp', type: 'spotify', href: 'https://open.spotify.com', label: 'Spotify', sub: 'Escuchá mi música' },
       ],
       backgroundEffect: 'liquid',
     })

@@ -6,6 +6,7 @@ import { getDb } from '@/db';
 import { users, artists } from '@/db/schema';
 import { claimInviteCode, releaseInviteCode } from '@/lib/invite-codes';
 import { signIn } from '@/auth';
+import { defaultLinks } from '@/lib/links';
 
 /** Postgres unique_violation — https://www.postgresql.org/docs/current/errcodes-appendix.html */
 function isUniqueViolation(err: unknown): boolean {
@@ -84,7 +85,7 @@ export async function signup(_prevState: SignupState, formData: FormData): Promi
       slug,
       displayName: slugFromEmail(email),
       bio: '',
-      links: [],
+      links: defaultLinks(),
       backgroundEffect: 'liquid',
       trialEndsAt,
       maxProducts: claimed.maxProducts,

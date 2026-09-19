@@ -2,6 +2,8 @@ import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import { artists, dailyStats } from '@/db/schema';
 import { isSuspended, isTrialExpired } from './artists';
+import { activeLinks } from './links';
+import type { ArtistLink } from './types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -250,7 +252,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       displayName: r.displayName,
       avatarUrl: r.avatarUrl,
       bio: r.bio,
-      linkCount: (r.links as unknown[]).length,
+      linkCount: activeLinks(r.links as ArtistLink[]).length,
       productCount: (r.products as unknown[]).length,
       trialEndsAt: r.trialEndsAt,
       isBlocked: r.isBlocked,

@@ -250,6 +250,13 @@ a {
 .link-tiktok .link-icon { background: var(--ink); }
 .link-spotify .link-icon { background: #1db954; }
 .link-youtube .link-icon { background: #ff0033; }
+.link-custom .link-icon { background: var(--ink-soft); overflow: hidden; }
+.link-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 
 .link-label {
   flex: 1;

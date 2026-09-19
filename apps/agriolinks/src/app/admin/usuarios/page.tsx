@@ -5,6 +5,8 @@ import { getDb } from '@/db';
 import { artists } from '@/db/schema';
 import { isAdminEmail } from '@/lib/admin';
 import { isSuspended, isTrialExpired } from '@/lib/artists';
+import { activeLinks } from '@/lib/links';
+import type { ArtistLink } from '@/lib/types';
 import { AdminNav } from '../AdminNav';
 import { toggleBlocked, redeemCodeForArtist } from './actions';
 import '../../dashboard/dashboard.css';
@@ -44,7 +46,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                     👁️ {artist.displayName} <span className="admin-user-slug">@{artist.slug}</span>
                   </a>
                   <p className="dash-stats-row" style={{ margin: '4px 0 0' }}>
-                    👁️ {artist.viewCount} visitas · 💬 {artist.buyClickCount} clicks · 🔗 {(artist.links as unknown[]).length} links ·
+                    👁️ {artist.viewCount} visitas · 💬 {artist.buyClickCount} clicks · 🔗 {activeLinks(artist.links as ArtistLink[]).length} links ·
                     🛍️ {(artist.products as unknown[]).length}/{artist.maxProducts} productos
                     {artist.signupCode ? ` · canal: ${artist.signupCode}` : ''}
                   </p>

@@ -167,7 +167,7 @@ export default async function LandingPage() {
           <ul className="landing-price-list">
             <li>✅ Página pública con tu propio link</li>
             <li>✅ 6 fondos animados para elegir</li>
-            <li>✅ Foto de perfil y links ilimitados</li>
+            <li>✅ Foto de perfil y hasta 20 links</li>
             <li>✅ Dashboard para editar todo vos mismo</li>
           </ul>
           <Link className="landing-btn-primary" href={SIGNUP_WITH_CODE} style={{ width: '100%', justifyContent: 'center' }}>

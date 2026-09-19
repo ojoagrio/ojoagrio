@@ -3,21 +3,16 @@
 import Link from 'next/link';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { isTrialExpired, isSuspended, type OwnArtistProfile } from '@/lib/artists';
-import { SocialIcon, type SocialType, useBackgroundOverride } from '@ojoagrio/ui';
+import { useBackgroundOverride } from '@ojoagrio/ui';
 import { ArtistPublicView } from '@/components/ArtistPublicView';
 import { saveProfile, logout, type SaveProfileState } from './actions';
 import { ShareButton } from './ShareButton';
 import { AvatarUpload } from './AvatarUpload';
 import { ComingSoonModal } from './ComingSoonModal';
 import { OnboardingChecklist } from './OnboardingChecklist';
+import { LinksEditor } from './LinksEditor';
+import { activeLinks } from '@/lib/links';
 import './dashboard.css';
-
-const SOCIAL_TYPES: { type: SocialType; label: string }[] = [
-  { type: 'instagram', label: 'Instagram' },
-  { type: 'tiktok', label: 'TikTok' },
-  { type: 'spotify', label: 'Spotify' },
-  { type: 'youtube', label: 'YouTube' },
-];
 
 const BACKGROUND_OPTIONS = [
   { value: 'liquid', label: '💧 Líquido' },
@@ -79,7 +74,7 @@ export function ProfileForm({
   const suspended = isSuspended(artist);
   const remaining = daysLeft(artist.trialEndsAt);
 
-  const linkByType = Object.fromEntries(artist.links.map((l) => [l.type, l]));
+  const filledLinks = activeLinks(artist.links);
   const publicPath = `/agriolinks/u/${artist.slug}`;
 
   if (view === 'preview') {
@@ -91,7 +86,7 @@ export function ProfileForm({
           </button>
           <ShareButton path={publicPath} title={artist.displayName} />
         </div>
-        <ArtistPublicView artist={{ ...artist, avatarUrl }} reveal={false} paused={suspended} />
+        <ArtistPublicView artist={{ ...artist, links: filledLinks, avatarUrl }} reveal={false} paused={suspended} />
       </div>
     );
   }
@@ -129,7 +124,7 @@ export function ProfileForm({
         <p className="dash-stats-row">
           👁️ {artist.viewCount} visita{artist.viewCount === 1 ? '' : 's'}
           {' · '}
-          🔗 {artist.links.length} link{artist.links.length === 1 ? '' : 's'} activo{artist.links.length === 1 ? '' : 's'}
+          🔗 {filledLinks.length} link{filledLinks.length === 1 ? '' : 's'} activo{filledLinks.length === 1 ? '' : 's'}
           {' · '}
           🛍️ {artist.products.length} producto{artist.products.length === 1 ? '' : 's'}
         </p>
@@ -221,37 +216,12 @@ export function ProfileForm({
 
           <fieldset disabled={suspended} className={`dash-card${suspended ? ' dash-card-disabled' : ''}`}>
             <h2 className="dash-section-title">Tus links</h2>
-            {SOCIAL_TYPES.map(({ type, label }) => (
-              <div key={type} className="dash-link-card">
-                <span className={`dash-link-icon ${type}`}>
-                  <SocialIcon type={type} />
-                </span>
-                <div className="dash-link-fields">
-                  <span className="dash-link-name">{label}</span>
-                  <input
-                    className="dash-input"
-                    name={`link_${type}_href`}
-                    defaultValue={linkByType[type]?.href ?? ''}
-                    placeholder={`Link de ${label} (vacío = oculto)`}
-                  />
-                  <input
-                    className="dash-input"
-                    name={`link_${type}_label`}
-                    defaultValue={linkByType[type]?.label ?? label}
-                    placeholder="Texto del botón"
-                  />
-                  <input
-                    className="dash-input"
-                    name={`link_${type}_sub`}
-                    defaultValue={linkByType[type]?.sub ?? ''}
-                    placeholder="Subtítulo (ej: @usuario)"
-                  />
-                  {state.fieldErrors?.[`link_${type}`] && (
-                    <p className="dash-field-error">{state.fieldErrors[`link_${type}`]}</p>
-                  )}
-                </div>
-              </div>
-            ))}
+            <LinksEditor
+              userId={userId}
+              initialLinks={artist.links}
+              fieldErrors={state.fieldErrors}
+              onStructuralChange={scheduleAutosave}
+            />
           </fieldset>
 
           {state.error && <p className="dash-message error">{state.error}</p>}

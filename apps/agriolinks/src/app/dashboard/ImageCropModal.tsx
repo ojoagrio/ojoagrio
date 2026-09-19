@@ -13,11 +13,13 @@ interface Props {
   /** Token-generation endpoint for this upload, e.g. '/agriolinks/api/avatar/upload'. */
   uploadUrl: string;
   cropShape?: 'round' | 'rect';
+  /** Side of the square output in px — small icons don't need the 512 default. */
+  outputSize?: number;
   onClose: () => void;
   onUploaded: (url: string) => void;
 }
 
-export function ImageCropModal({ open, title, uploadPath, uploadUrl, cropShape = 'rect', onClose, onUploaded }: Props) {
+export function ImageCropModal({ open, title, uploadPath, uploadUrl, cropShape = 'rect', outputSize, onClose, onUploaded }: Props) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -63,7 +65,7 @@ export function ImageCropModal({ open, title, uploadPath, uploadUrl, cropShape =
     setUploading(true);
     setError(null);
     try {
-      const blob = await getCroppedImageBlob(imageSrc, croppedArea);
+      const blob = await getCroppedImageBlob(imageSrc, croppedArea, outputSize);
       const result = await upload(uploadPath, blob, {
         access: 'public',
         handleUploadUrl: uploadUrl,
