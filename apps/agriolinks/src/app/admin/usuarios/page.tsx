@@ -46,6 +46,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                   <p className="dash-stats-row" style={{ margin: '4px 0 0' }}>
                     👁️ {artist.viewCount} visitas · 💬 {artist.buyClickCount} clicks · 🔗 {(artist.links as unknown[]).length} links ·
                     🛍️ {(artist.products as unknown[]).length}/{artist.maxProducts} productos
+                    {artist.signupCode ? ` · canal: ${artist.signupCode}` : ''}
                   </p>
                 </div>
                 <span className={`dash-badge ${artist.isBlocked ? 'soldout' : suspended ? 'soldout' : 'available'}`}>

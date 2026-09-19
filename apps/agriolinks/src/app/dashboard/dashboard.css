@@ -563,6 +563,32 @@ a.dash-admin-nav-item:hover {
   font-size: 0.88rem;
 }
 
+.admin-trend-summary {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+
+.admin-day-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+  margin-bottom: 14px;
+}
+
+.admin-day-bar {
+  flex: 1;
+  background: var(--rosa);
+  border-radius: 2px 2px 0 0;
+  min-width: 0;
+}
+
+.admin-day-bar.clicks {
+  background: var(--turquoise);
+}
+
 .admin-week-bars {
   display: flex;
   align-items: flex-end;

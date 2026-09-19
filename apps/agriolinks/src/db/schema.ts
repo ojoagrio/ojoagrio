@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, jsonb, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, jsonb, integer, boolean, date, primaryKey } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -59,8 +59,26 @@ export const artists = pgTable('artists', {
   // dashboard, paused public page) rather than denying login outright, so an
   // affected artist can still see why.
   isBlocked: boolean('is_blocked').notNull().default(false),
+  // Which invite code this artist signed up with (channel attribution). Null for
+  // accounts created before this column existed. Admin coupon redemptions never
+  // overwrite it — it records how they arrived, not what they were later given.
+  signupCode: text('signup_code'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Artist = typeof artists.$inferSelect;
 export type NewArtist = typeof artists.$inferInsert;
+
+// Per-day counters (America/Mexico_City days) behind the admin trend charts.
+// artists.viewCount / buyClickCount stay as the all-time totals; this table
+// only exists to answer "how did it move". One row per artist per day.
+export const dailyStats = pgTable(
+  'daily_stats',
+  {
+    slug: text('slug').notNull(),
+    day: date('day', { mode: 'string' }).notNull(),
+    views: integer('views').notNull().default(0),
+    buyClicks: integer('buy_clicks').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.slug, t.day] })]
+);

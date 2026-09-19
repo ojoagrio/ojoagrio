@@ -1,5 +1,6 @@
+import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
-import { artists } from '@/db/schema';
+import { artists, dailyStats } from '@/db/schema';
 import { isSuspended, isTrialExpired } from './artists';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -17,6 +18,29 @@ export interface StatsRow {
   viewCount: number;
   buyClickCount: number;
   createdAt: Date;
+  signupCode: string | null;
+}
+
+export interface ChannelStats {
+  /** Invite code the artists signed up with, or null for accounts from before attribution existed. */
+  code: string | null;
+  registered: number;
+  /** Photo + bio + at least one link — a page someone would actually share. */
+  activated: number;
+  withProduct: number;
+  trialExpired: number;
+}
+
+export interface DailyPoint {
+  day: string;
+  views: number;
+  clicks: number;
+}
+
+export interface DailySeries {
+  points: DailyPoint[];
+  last7: { views: number; clicks: number };
+  prev7: { views: number; clicks: number };
 }
 
 export interface ExpiringArtist {
@@ -52,6 +76,7 @@ export interface AdminStats {
   signupsByWeek: WeekBucket[];
   topByViews: { slug: string; displayName: string; viewCount: number; buyClickCount: number }[];
   inactive: { slug: string; displayName: string; daysSinceSignup: number }[];
+  byChannel: ChannelStats[];
 }
 
 function pct(part: number, whole: number): number {
@@ -138,6 +163,22 @@ export function computeStats(rows: StatsRow[], now: Date = new Date()): AdminSta
     }))
     .sort((a, b) => b.daysSinceSignup - a.daysSinceSignup);
 
+  const channels = new Map<string | null, StatsRow[]>();
+  for (const r of real) {
+    const key = r.signupCode ?? null;
+    channels.set(key, [...(channels.get(key) ?? []), r]);
+  }
+  const byChannel: ChannelStats[] = [...channels.entries()]
+    .map(([code, group]) => ({
+      code,
+      registered: group.length,
+      activated: group.filter((r) => !!r.avatarUrl && r.bio.trim().length > 0 && r.linkCount > 0).length,
+      withProduct: group.filter((r) => r.productCount > 0).length,
+      trialExpired: group.filter((r) => !r.isBlocked && isTrialExpired(r.trialEndsAt)).length,
+    }))
+    // Biggest channel first; the "sin dato" bucket (null) always last.
+    .sort((a, b) => (a.code === null ? 1 : b.code === null ? -1 : b.registered - a.registered));
+
   return {
     total: real.length,
     active: active.length,
@@ -151,7 +192,54 @@ export function computeStats(rows: StatsRow[], now: Date = new Date()): AdminSta
     signupsByWeek,
     topByViews,
     inactive,
+    byChannel,
   };
+}
+
+function addDays(day: string, n: number): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Fills a fixed window of `days` ending on `today` (YYYY-MM-DD) with zeros
+ * for days that had no traffic, so the chart's x-axis is always continuous.
+ */
+export function buildDailySeries(
+  rows: { day: string; views: number; clicks: number }[],
+  today: string,
+  days = 30
+): DailySeries {
+  const byDay = new Map(rows.map((r) => [r.day, r]));
+  const points: DailyPoint[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const day = addDays(today, -i);
+    const r = byDay.get(day);
+    points.push({ day, views: r?.views ?? 0, clicks: r?.clicks ?? 0 });
+  }
+  const sum = (slice: DailyPoint[]) => ({
+    views: slice.reduce((s, p) => s + p.views, 0),
+    clicks: slice.reduce((s, p) => s + p.clicks, 0),
+  });
+  return { points, last7: sum(points.slice(-7)), prev7: sum(points.slice(-14, -7)) };
+}
+
+export async function getDailySeries(days = 30): Promise<DailySeries> {
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+  const from = addDays(today, -(days - 1));
+  // Join to artists so the demo and admin accounts (no trial) don't pollute the trend.
+  const rows = await getDb()
+    .select({
+      day: dailyStats.day,
+      views: sql<number>`sum(${dailyStats.views})::int`,
+      clicks: sql<number>`sum(${dailyStats.buyClicks})::int`,
+    })
+    .from(dailyStats)
+    .innerJoin(artists, eq(artists.slug, dailyStats.slug))
+    .where(and(isNotNull(artists.trialEndsAt), gte(dailyStats.day, from)))
+    .groupBy(dailyStats.day);
+  return buildDailySeries(rows, today, days);
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
@@ -169,6 +257,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       viewCount: r.viewCount,
       buyClickCount: r.buyClickCount,
       createdAt: r.createdAt,
+      signupCode: r.signupCode,
     }))
   );
 }

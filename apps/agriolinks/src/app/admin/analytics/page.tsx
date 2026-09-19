@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { isAdminEmail } from '@/lib/admin';
-import { getAdminStats } from '@/lib/admin-stats';
+import { getAdminStats, getDailySeries } from '@/lib/admin-stats';
 import { AdminNav } from '../AdminNav';
 import '../../dashboard/dashboard.css';
 
@@ -11,8 +11,17 @@ export default async function AdminAnalyticsPage() {
   if (!session?.user?.id) redirect('/login');
   if (!isAdminEmail(session.user.email)) redirect('/dashboard');
 
-  const s = await getAdminStats();
+  const [s, daily] = await Promise.all([getAdminStats(), getDailySeries(30)]);
   const maxWeek = Math.max(1, ...s.signupsByWeek.map((w) => w.count));
+  const maxViews = Math.max(1, ...daily.points.map((p) => p.views));
+  const maxClicks = Math.max(1, ...daily.points.map((p) => p.clicks));
+
+  // Week-over-week change; null when last week had nothing to compare against.
+  const change = (now: number, prev: number) => (prev === 0 ? null : Math.round(((now - prev) / prev) * 100));
+  const trendLabel = (now: number, prev: number) => {
+    const c = change(now, prev);
+    return c === null ? 'sin semana previa para comparar' : `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% vs semana anterior`;
+  };
 
   const kpis = [
     { label: 'Artistas', value: s.total },
@@ -37,6 +46,54 @@ export default async function AdminAnalyticsPage() {
             <div className="admin-kpi" key={k.label}>
               <span className="admin-kpi-value">{k.value}</span>
               <span className="admin-kpi-label">{k.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="dash-card">
+          <h2 className="dash-section-title">Tendencia (últimos 30 días)</h2>
+          <p className="dash-url">
+            Cuenta desde que se activó el registro diario — los días anteriores figuran en 0.
+          </p>
+          <p className="admin-trend-summary">
+            👁️ <strong>{daily.last7.views}</strong> visitas en 7 días · {trendLabel(daily.last7.views, daily.prev7.views)}
+          </p>
+          <div className="admin-day-bars" aria-label="Visitas por día">
+            {daily.points.map((p) => (
+              <div
+                className="admin-day-bar"
+                key={p.day}
+                title={`${p.day}: ${p.views} visitas`}
+                style={{ height: `${(p.views / maxViews) * 60 + 2}px` }}
+              />
+            ))}
+          </div>
+          <p className="admin-trend-summary">
+            💬 <strong>{daily.last7.clicks}</strong> clicks en Comprar en 7 días · {trendLabel(daily.last7.clicks, daily.prev7.clicks)}
+          </p>
+          <div className="admin-day-bars" aria-label="Clicks por día">
+            {daily.points.map((p) => (
+              <div
+                className="admin-day-bar clicks"
+                key={p.day}
+                title={`${p.day}: ${p.clicks} clicks`}
+                style={{ height: `${(p.clicks / maxClicks) * 60 + 2}px` }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="dash-card">
+          <h2 className="dash-section-title">Rendimiento por canal</h2>
+          <p className="dash-url">Código con el que se registró cada artista. «Activados» = foto + bio + al menos 1 link.</p>
+          {s.byChannel.length === 0 && <p className="dash-url">Todavía no hay registros.</p>}
+          {s.byChannel.map((c) => (
+            <div className="admin-list-row" key={c.code ?? 'sin-dato'}>
+              <span className="admin-funnel-label">{c.code ?? 'Sin dato (registro anterior)'}</span>
+              <span className="dash-code-meta">
+                {c.registered} registrados · {c.activated} activados ({Math.round((c.activated / c.registered) * 100)}%) ·{' '}
+                {c.withProduct} con producto · {c.trialExpired} vencidos
+              </span>
             </div>
           ))}
         </div>
