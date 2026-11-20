@@ -5,6 +5,22 @@
 // Assets en /public/bruno-arruguitas (fotos redimensionadas desde ese proyecto).
 
 const TIKTOK = 'https://www.tiktok.com/@bruno.arruguitas';
+const EMAIL = 'ojoagrio@gmail.com';
+const MAILTO = `mailto:${EMAIL}?subject=${encodeURIComponent('Colaboración con Bruno Arruguitas 🐾')}`;
+
+// Pedidos de saludos: el formulario arma el mensaje y abre WhatsApp con él.
+const WHATSAPP = '5214464796315';
+
+// Precios en MXN (sugeridos para una cuenta de ~12K; subirlos conforme crezca).
+// precio: null muestra "Cotiza por WhatsApp"; desde: true antepone "Desde".
+const saludos = [
+  { id: 'cumple', emoji: '🎂', titulo: 'Saludo de cumpleaños', desc: 'Bruno le canta las mañanitas a su manera.', precio: 149 as number | null, desde: false },
+  { id: 'dedicatoria', emoji: '💌', titulo: 'Dedicatoria', desc: 'Para tu crush, tu jefa o tu compa. Con todo el flow.', precio: 149 as number | null, desde: false },
+  { id: 'chatito', emoji: '🐶', titulo: 'Saludo para tu chatito', desc: 'De pug a pug, con la foto de tu perrito. Tu chatito también merece fama.', precio: 199 as number | null, desde: false },
+  { id: 'otro', emoji: '✨', titulo: 'Otra ocasión', desc: 'Graduación, aniversario, ánimo… tú dime, pariente.', precio: 199 as number | null, desde: true },
+];
+const precioTxt = (s: { precio: number | null; desde: boolean }) =>
+  s.precio == null ? 'Cotiza por WhatsApp' : `${s.desde ? 'Desde ' : ''}$${s.precio} MXN`;
 const BASE = '/bruno-arruguitas';
 
 // Actualizar a mano cuando la cuenta crezca.
@@ -15,7 +31,7 @@ const avance = Math.max(3, Math.round((SEGUIDORES / META) * 100));
 
 const title = 'Bruno Arruguitas — el jefe del barrio 🐾';
 const description =
-  'Página oficial de Bruno Arruguitas, el pug chilango de TikTok. Paseos, chismes de chatitos y puro Equipo Arruguitas. ¡Ira nomás!';
+  'Página oficial de Bruno Arruguitas, el pug chilango de TikTok. Paseos, chismes de chatitos y pide tu saludo personalizado de Bruno. ¡Ira nomás!';
 const ogImage = new URL(`${BASE}/og.jpg`, Astro.site).toString();
 
 const ficha = [
@@ -117,6 +133,14 @@ const consejos = [
           </span>
         </a>
 
+        <a class="cta-saludo" href="#saludos">
+          <span aria-hidden="true">🎥</span>
+          <span>
+            Pide tu saludo de Bruno
+            <small>Video personalizado · desde $149 MXN</small>
+          </span>
+        </a>
+
         <button class="jingle" type="button" id="jingle-btn" aria-pressed="false">
           <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
           <span class="jingle-txt">Dale play a mi canción</span>
@@ -211,6 +235,81 @@ const consejos = [
         </div>
       </section>
 
+      <!-- SALUDOS -->
+      <section id="saludos">
+        <h2 class="display">🎥 Saludos de Bruno</h2>
+        <p class="sub">Un video personalizado del jefe del barrio para quien tú quieras. Entrega en 2 a 3 días. ⏱️</p>
+
+        <div class="saludos">
+          {saludos.map((s) => (
+            <div class="card saludo">
+              <span class="c-emoji" aria-hidden="true">{s.emoji}</span>
+              <h3>{s.titulo}</h3>
+              <p>{s.desc}</p>
+              <span class="precio">{precioTxt(s)}</span>
+            </div>
+          ))}
+        </div>
+
+        <ol class="pasos">
+          <li><b>Llena tus datos</b> aquí abajo</li>
+          <li><b>Se abre WhatsApp</b> con tu pedido listo, solo dale enviar</li>
+          <li><b>Te mandamos el link de pago</b> y recibes tu video en <b>2 a 3 días</b></li>
+        </ol>
+
+        <form class="card pedido" id="pedido" data-wa={WHATSAPP}>
+          <label>
+            Tipo de saludo
+            <select name="tipo" required>
+              {saludos.map((s) => (
+                <option value={`${s.titulo} (${precioTxt(s)})`}>{s.emoji} {s.titulo} · {precioTxt(s)}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            ¿Para quién es?
+            <input name="para" type="text" required maxlength="60" placeholder="Nombre de quien lo recibe" autocomplete="off" />
+          </label>
+          <label>
+            ¿De parte de quién?
+            <input name="de" type="text" required maxlength="60" placeholder="Tu nombre" autocomplete="name" />
+          </label>
+          <label>
+            ¿Para cuándo lo necesitas?
+            <input name="fecha" type="date" />
+          </label>
+          <label>
+            Cuéntale a Bruno
+            <textarea name="detalles" rows="3" maxlength="400" placeholder="La ocasión, un apodo, un dato chistoso, qué quieres que diga…"></textarea>
+          </label>
+          <button type="submit" class="wa-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z" />
+            </svg>
+            Pedir mi saludo por WhatsApp
+          </button>
+          <p class="nota">Tus datos solo viajan en el mensaje de WhatsApp. No guardamos nada.</p>
+        </form>
+      </section>
+
+      <!-- COLABORACIONES -->
+      <section>
+        <h2 class="display">🤝 Colaboraciones</h2>
+        <div class="card collab">
+          <p>
+            ¿Marca pet-friendly, evento, producto para chatitos o collab con otro perrito influencer?
+            <b>El jefe del barrio está abierto a negociar</b> (acepta pago en croquetas, pero también en serio 😎).
+          </p>
+          <a class="collab-btn" href={MAILTO}>
+            <span aria-hidden="true">✉️</span>
+            <span>
+              Escríbenos
+              <small>{EMAIL}</small>
+            </span>
+          </a>
+        </div>
+      </section>
+
       <footer>
         <a class="cta cta-sm" href={TIKTOK} target="_blank" rel="noopener noreferrer">Seguir a Bruno →</a>
         <p class="display adios">Ahí nos vidrios 🐾</p>
@@ -237,6 +336,30 @@ const consejos = [
           }
         });
         audio.addEventListener('ended', function () { set(false); });
+
+        // Pedido de saludo → mensaje prellenado en WhatsApp.
+        var form = document.getElementById('pedido');
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var d = new FormData(form);
+          var v = function (k) { return String(d.get(k) || '').trim(); };
+          var fecha = v('fecha');
+          if (fecha) {
+            var p = fecha.split('-');
+            fecha = p[2] + '/' + p[1] + '/' + p[0];
+          }
+          var lineas = [
+            '¡Quiubo! Quiero un saludo de Bruno Arruguitas 🐾',
+            '',
+            '🎥 Tipo: ' + v('tipo'),
+            '🎯 Para: ' + v('para'),
+            '🙋 De parte de: ' + v('de'),
+          ];
+          if (fecha) lineas.push('📅 Para el: ' + fecha);
+          if (v('detalles')) lineas.push('📝 Detalles: ' + v('detalles'));
+          var url = 'https://wa.me/' + form.dataset.wa + '?text=' + encodeURIComponent(lineas.join('\n'));
+          window.open(url, '_blank', 'noopener');
+        });
       })();
     </script>
   </body>
@@ -412,6 +535,40 @@ const consejos = [
   .cta span { display: flex; flex-direction: column; text-align: left; }
 
   .cta small { font-weight: 600; font-size: 0.85rem; opacity: 0.8; }
+
+  .cta-saludo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 14px;
+    padding: 12px 18px;
+    background: var(--rosa);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1.1;
+    border: 3px solid var(--mascara);
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+    transition: transform 0.15s ease;
+  }
+
+  .cta-saludo:hover, .cta-saludo:focus-visible { transform: translateY(-2px) rotate(1deg); }
+
+  .cta-saludo > span:first-child { font-size: 1.6rem; }
+
+  .cta-saludo span:last-child { display: flex; flex-direction: column; text-align: left; }
+
+  .cta-saludo small { font-weight: 600; font-size: 0.85rem; opacity: 0.95; }
+
+  html { scroll-behavior: smooth; }
+
+  #saludos { scroll-margin-top: 16px; }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
   .jingle {
     margin-top: 16px;
@@ -608,6 +765,110 @@ const consejos = [
   .consejo h3 { margin: 4px 0 4px; font-size: 1.02rem; line-height: 1.15; }
 
   .consejo p { margin: 0; font-size: 0.92rem; line-height: 1.35; }
+
+  /* SALUDOS */
+  .saludos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .saludo { padding: 14px; display: flex; flex-direction: column; }
+
+  .saludo h3 { margin: 4px 0 4px; font-size: 1.02rem; line-height: 1.15; }
+
+  .saludo p { margin: 0 0 10px; font-size: 0.92rem; line-height: 1.35; flex: 1; }
+
+  .precio {
+    align-self: flex-start;
+    padding: 2px 10px;
+    background: var(--arena);
+    border: 2px solid var(--mascara);
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+
+  .pasos {
+    margin: 18px 0 14px;
+    padding-left: 1.4em;
+    font-size: 0.98rem;
+  }
+
+  .pasos li { margin: 4px 0; }
+
+  .pedido { padding: 18px; display: grid; gap: 12px; }
+
+  .pedido label { display: grid; gap: 4px; font-weight: 800; font-size: 0.95rem; }
+
+  .pedido input,
+  .pedido select,
+  .pedido textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font: 600 1rem 'Baloo 2', sans-serif;
+    color: var(--mascara);
+    background: #fff;
+    border: 2px solid var(--mascara);
+    border-radius: 12px;
+  }
+
+  .pedido textarea { resize: vertical; }
+
+  .pedido input:focus,
+  .pedido select:focus,
+  .pedido textarea:focus { outline: 3px solid var(--rosa); outline-offset: 1px; }
+
+  .wa-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 14px 16px;
+    background: #25d366;
+    color: #0b2e17;
+    font: 800 1.1rem 'Baloo 2', sans-serif;
+    border: 3px solid var(--mascara);
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .wa-btn svg { width: 26px; height: 26px; flex: none; }
+
+  .wa-btn:hover, .wa-btn:focus-visible { transform: translateY(-2px); }
+
+  .wa-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--mascara); }
+
+  .nota { margin: 0; font-size: 0.82rem; color: #6d6058; text-align: center; }
+
+  /* COLABORACIONES */
+  .collab { padding: 18px; }
+
+  .collab p { margin: 0 0 14px; }
+
+  .collab-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--rosa);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1.1;
+    border: 3px solid var(--mascara);
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    transition: transform 0.15s ease;
+  }
+
+  .collab-btn:hover, .collab-btn:focus-visible { transform: translateY(-2px); }
+
+  .collab-btn > span:first-child { font-size: 1.5rem; }
+
+  .collab-btn span:last-child { display: flex; flex-direction: column; min-width: 0; }
+
+  .collab-btn small { font-weight: 600; font-size: 0.9rem; opacity: 0.95; overflow-wrap: anywhere; }
 
   /* FOOTER */
   footer { margin-top: 44px; text-align: center; }
